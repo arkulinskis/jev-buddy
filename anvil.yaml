@@ -1,0 +1,356 @@
+allow_embedding: false
+db_schema:
+  app_settings:
+    client: none
+    columns:
+    - admin_ui:
+        order: 0
+        width: 200
+      name: key
+      type: string
+    - admin_ui:
+        order: 1
+        width: 200
+      name: value
+      type: simpleObject
+    indexes: []
+    server: full
+    title: App settings
+  feedback:
+    client: none
+    columns:
+    - admin_ui:
+        order: 0
+        width: 200
+      name: user
+      target: users
+      type: link_single
+    - admin_ui:
+        order: 1
+        width: 200
+      name: name
+      type: string
+    - admin_ui:
+        order: 2
+        width: 200
+      name: email
+      type: string
+    - admin_ui:
+        order: 3
+        width: 200
+      name: kind
+      type: string
+    - admin_ui:
+        order: 4
+        width: 200
+      name: message
+      type: string
+    - admin_ui:
+        order: 5
+        width: 200
+      name: context
+      type: simpleObject
+    - admin_ui:
+        order: 6
+        width: 200
+      name: status
+      type: string
+    - admin_ui:
+        order: 7
+        width: 200
+      name: note
+      type: string
+    - admin_ui:
+        order: 8
+        width: 200
+      name: created
+      type: datetime
+    indexes: []
+    server: full
+    title: Feedback
+  jev_runs:
+    client: none
+    columns:
+    - admin_ui:
+        order: 0
+        width: 200
+      name: user
+      target: users
+      type: link_single
+    - admin_ui:
+        order: 1
+        width: 200
+      name: created
+      type: datetime
+    - admin_ui:
+        order: 2
+        width: 200
+      name: questions
+      type: number
+    - admin_ui:
+        order: 3
+        width: 200
+      name: input_tokens
+      type: number
+    - admin_ui:
+        order: 4
+        width: 200
+      name: cost
+      type: number
+    - admin_ui:
+        order: 5
+        width: 200
+      name: ms
+      type: number
+    - admin_ui:
+        order: 6
+        width: 200
+      name: ok
+      type: bool
+    - admin_ui:
+        order: 7
+        width: 200
+      name: error
+      type: string
+    indexes: []
+    server: full
+    title: Jev runs
+  recipe_likes:
+    client: none
+    columns:
+    - admin_ui:
+        order: 0
+        width: 200
+      name: user
+      target: users
+      type: link_single
+    - admin_ui:
+        order: 1
+        width: 200
+      name: recipe
+      target: recipes
+      type: link_single
+    - admin_ui:
+        order: 2
+        width: 200
+      name: created
+      type: datetime
+    - admin_ui:
+        order: 3
+        width: 200
+      name: is_demo
+      type: bool
+    indexes: []
+    server: full
+    title: Recipe likes
+  recipes:
+    client: none
+    columns:
+    - admin_ui:
+        order: 0
+        width: 200
+      name: owner
+      target: users
+      type: link_single
+    - admin_ui:
+        order: 1
+        width: 200
+      name: title
+      type: string
+    - admin_ui:
+        order: 2
+        width: 200
+      name: summary
+      type: string
+    - admin_ui:
+        order: 3
+        width: 200
+      name: category
+      type: string
+    - admin_ui:
+        order: 4
+        width: 200
+      name: state
+      type: string
+    - admin_ui:
+        order: 5
+        width: 200
+      name: questions
+      type: simpleObject
+    - admin_ui:
+        order: 6
+        width: 200
+      name: is_public
+      type: bool
+    - admin_ui:
+        order: 7
+        width: 200
+      name: hidden
+      type: bool
+    - admin_ui:
+        order: 8
+        width: 200
+      name: likes
+      type: number
+    - admin_ui:
+        order: 9
+        width: 200
+      name: forks
+      type: number
+    - admin_ui:
+        order: 10
+        width: 200
+      name: forked_from
+      target: recipes
+      type: link_single
+    - admin_ui:
+        order: 11
+        width: 200
+      name: created
+      type: datetime
+    - admin_ui:
+        order: 12
+        width: 200
+      name: updated
+      type: datetime
+    - admin_ui:
+        order: 13
+        width: 200
+      name: is_demo
+      type: bool
+    indexes: []
+    server: full
+    title: Recipes
+  users:
+    client: none
+    columns:
+    - admin_ui:
+        order: 0
+        width: 200
+      client_hidden: false
+      name: email
+      type: string
+    - admin_ui:
+        order: 1
+        width: 200
+      client_hidden: true
+      name: enabled
+      type: bool
+    - admin_ui:
+        order: 2
+        width: 200
+      client_hidden: true
+      name: last_login
+      type: datetime
+    - admin_ui:
+        order: 3
+        width: 200
+      client_hidden: true
+      name: password_hash
+      type: string
+    - admin_ui:
+        order: 4
+        width: 200
+      client_hidden: true
+      name: n_password_failures
+      type: number
+    - admin_ui:
+        order: 5
+        width: 200
+      client_hidden: true
+      name: confirmed_email
+      type: bool
+    - admin_ui:
+        order: 6
+        width: 200
+      client_hidden: true
+      name: signed_up
+      type: datetime
+    - admin_ui:
+        order: 7
+        width: 200
+      client_hidden: false
+      name: display_name
+      type: string
+    - admin_ui:
+        order: 8
+        width: 200
+      client_hidden: false
+      name: is_admin
+      type: bool
+    - admin_ui:
+        order: 9
+        width: 200
+      client_hidden: false
+      name: is_demo
+      type: bool
+    - admin_ui:
+        order: 10
+        width: 200
+      client_hidden: false
+      name: last_seen
+      type: datetime
+    - admin_ui:
+        order: 11
+        width: 200
+      client_hidden: false
+      name: legal_version
+      type: string
+    - admin_ui:
+        order: 12
+        width: 200
+      client_hidden: false
+      name: legal_accepted_at
+      type: datetime
+    - admin_ui:
+        order: 13
+        width: 200
+      client_hidden: false
+      name: legal_source
+      type: string
+    indexes: []
+    server: full
+    title: Users
+metadata:
+  description: 'The friendly developer guide to Jev, the AI decision model: choice, noul and score explained with code, business
+    examples, a playground and a cost calculator.'
+  logo_img: asset:icon-512.png
+  title: Jev Buddy
+name: Jev Buddy
+native_deps:
+  head_html: "<script src=\"_/theme/legal-kit.js?v=ad569208fa\"></script>\n<meta name=\"viewport\" content=\"width=device-width,\
+    \ initial-scale=1, viewport-fit=cover\">\n<meta name=\"theme-color\" content=\"#070b14\">\n<meta name=\"apple-mobile-web-app-capable\"\
+    \ content=\"yes\">\n<link rel=\"preconnect\" href=\"https://fonts.googleapis.com\">\n<link rel=\"preconnect\" href=\"\
+    https://fonts.gstatic.com\" crossorigin>\n<link href=\"https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap\"\
+    \ rel=\"stylesheet\">\n<link id=\"ui-favicon\" rel=\"icon\" type=\"image/svg+xml\" href=\"_/theme/icon.svg?v=c7bff55fed\"\
+    >\n<link rel=\"apple-touch-icon\" href=\"_/theme/icon-180.png?v=c7bff55fed\">\n<script>\n/* Keep our tab icon: Anvil adds\
+    \ its own <link rel=\"icon\">, so drop any other icon link. */\n(function () {\n  function keep() {\n    var ours = document.getElementById('ui-favicon');\n\
+    \    if (!ours) return;\n    document.querySelectorAll('link[rel~=\"icon\"]').forEach(function (l) { if (l !== ours) l.remove();\
+    \ });\n  }\n  keep();\n  document.addEventListener('DOMContentLoaded', keep);\n  window.addEventListener('load', keep);\n\
+    })();\n</script>\n<link rel=\"stylesheet\" href=\"_/theme/app.css?v=3cf7887b67\">\n<script src=\"_/theme/app.js?v=c5c6b4c1a0\"\
+    ></script>\n"
+package_name: Jev_Buddy
+runtime_options:
+  client_version: '3'
+  server_spec:
+    base: python314
+  version: 3
+services:
+- client_config:
+    enable_v2: true
+  server_config: {}
+  source: /runtime/services/tables.yml
+- client_config:
+    allow_remember_me: true
+    allow_signup: true
+    confirm_email: false
+    enable_automatically: true
+    remember_me_days: 30
+    require_secure_passwords: true
+    use_email: true
+  server_config:
+    user_table: users
+  source: /runtime/services/anvil/users.yml
+startup:
+  module: Main
+  type: form
