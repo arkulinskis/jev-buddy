@@ -318,7 +318,7 @@ metadata:
   title: 'Jev Buddy: the developer guide to the Jev decision model'
 name: Jev Buddy
 native_deps:
-  head_html: "<script src=\"_/theme/legal-kit.js?v=b4d51f9623\"></script>\n<!-- seo:start (APP_MAKER/seo: edit seo/apps/jevbuddy.json\
+  head_html: "<script src=\"_/theme/legal-kit.js?v=8b314254d3\"></script>\n<!-- seo:start (APP_MAKER/seo: edit seo/apps/jevbuddy.json\
     \ and run seo.py, not here) -->\n<meta name=\"robots\" content=\"index, follow, max-image-preview:large, max-snippet:-1,\
     \ max-video-preview:-1\">\n<meta name=\"keywords\" content=\"Jev decision model, TypeSafe AI, AI classification API, LLM\
     \ alternative for decisions, typed AI answers, calibrated probabilities API, AI routing, support ticket classification,\
