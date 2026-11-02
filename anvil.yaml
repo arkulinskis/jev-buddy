@@ -319,20 +319,41 @@ metadata:
 name: Jev Buddy
 native_deps:
   head_html: "<script src=\"_/theme/legal-kit.js?v=38ce2c8f72\"></script>\n<!-- seo:start (APP_MAKER/seo: edit seo/apps/jevbuddy.json\
-    \ and run seo.py, not here) -->\n<meta name=\"robots\" content=\"index, follow, max-image-preview:large, max-snippet:-1,\
-    \ max-video-preview:-1\">\n<meta name=\"keywords\" content=\"Jev decision model, TypeSafe AI, AI classification API, LLM\
-    \ alternative for decisions, typed AI answers, calibrated probabilities API, AI routing, support ticket classification,\
-    \ AI cost calculator\">\n<meta name=\"author\" content=\"Arkvital\">\n<meta property=\"og:type\" content=\"website\">\n\
-    <meta property=\"og:site_name\" content=\"Jev Buddy\">\n<meta property=\"og:title\" content=\"Jev Buddy: the developer\
-    \ guide to the Jev decision model\">\n<meta property=\"og:description\" content=\"The friendly developer guide to Jev,\
-    \ the AI decision model: choice, noul and score explained with code, business examples, a playground and a cost calculator.\"\
-    >\n<meta property=\"og:locale\" content=\"en_CA\">\n<meta name=\"twitter:card\" content=\"summary\">\n<meta name=\"twitter:title\"\
-    \ content=\"Jev Buddy: the developer guide to the Jev decision model\">\n<meta name=\"twitter:description\" content=\"\
+    \ and run seo.py, not here) -->\n<link rel=\"canonical\" href=\"https://jev-buddy.anvil.app/\">\n<meta name=\"robots\"\
+    \ content=\"index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1\">\n<meta name=\"keywords\" content=\"\
+    Jev decision model, TypeSafe AI, AI classification API, LLM alternative for decisions, typed AI answers, calibrated probabilities\
+    \ API, AI routing, support ticket classification, AI cost calculator\">\n<meta name=\"author\" content=\"Arkvital\">\n\
+    <meta property=\"og:type\" content=\"website\">\n<meta property=\"og:site_name\" content=\"Jev Buddy\">\n<meta property=\"\
+    og:title\" content=\"Jev Buddy: the developer guide to the Jev decision model\">\n<meta property=\"og:description\" content=\"\
     The friendly developer guide to Jev, the AI decision model: choice, noul and score explained with code, business examples,\
-    \ a playground and a cost calculator.\">\n<!-- seo:end -->\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1,\
-    \ viewport-fit=cover\">\n<meta name=\"theme-color\" content=\"#070b14\">\n<meta name=\"apple-mobile-web-app-capable\"\
-    \ content=\"yes\">\n<link rel=\"preconnect\" href=\"https://fonts.googleapis.com\">\n<link rel=\"preconnect\" href=\"\
-    https://fonts.gstatic.com\" crossorigin>\n<link href=\"https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap\"\
+    \ a playground and a cost calculator.\">\n<meta property=\"og:locale\" content=\"en_CA\">\n<meta property=\"og:url\" content=\"\
+    https://jev-buddy.anvil.app/\">\n<meta property=\"og:image\" content=\"https://jev-buddy.anvil.app/_/theme/og-image.png\"\
+    >\n<meta property=\"og:image:width\" content=\"1200\"><meta property=\"og:image:height\" content=\"630\">\n<meta property=\"\
+    og:image:alt\" content=\"Jev Buddy: The friendly developer guide to Jev, the AI decision model\">\n<meta name=\"twitter:card\"\
+    \ content=\"summary_large_image\">\n<meta name=\"twitter:title\" content=\"Jev Buddy: the developer guide to the Jev decision\
+    \ model\">\n<meta name=\"twitter:description\" content=\"The friendly developer guide to Jev, the AI decision model: choice,\
+    \ noul and score explained with code, business examples, a playground and a cost calculator.\">\n<meta name=\"twitter:image\"\
+    \ content=\"https://jev-buddy.anvil.app/_/theme/og-image.png\">\n<link rel=\"alternate\" type=\"text/plain\" title=\"\
+    Jev Buddy for AI assistants\" href=\"https://jev-buddy.anvil.app/llms.txt\">\n<script type=\"application/ld+json\">{\"\
+    @context\": \"https://schema.org\", \"@graph\": [{\"@type\": \"WebApplication\", \"@id\": \"https://jev-buddy.anvil.app/#app\"\
+    , \"name\": \"Jev Buddy\", \"url\": \"https://jev-buddy.anvil.app/\", \"description\": \"The friendly developer guide\
+    \ to Jev, the AI decision model: choice, noul and score explained with code, business examples, a playground and a cost\
+    \ calculator.\", \"image\": \"https://jev-buddy.anvil.app/_/theme/og-image.png\", \"inLanguage\": \"en\", \"publisher\"\
+    : {\"@id\": \"https://arkvital.com/#org\"}, \"keywords\": \"Jev decision model, TypeSafe AI, AI classification API, LLM\
+    \ alternative for decisions, typed AI answers, calibrated probabilities API, AI routing, support ticket classification,\
+    \ AI cost calculator\", \"applicationCategory\": \"DeveloperApplication\", \"operatingSystem\": \"Any (web browser)\"\
+    , \"browserRequirements\": \"Requires JavaScript and a modern web browser\", \"featureList\": [\"A 15-chapter guide with\
+    \ code in Python, TypeScript, curl and the SDK\", \"The three primitives explained: choice, noul and score\", \"Twelve\
+    \ business use cases with routing code and costs\", \"A playground and saved recipes\", \"Cost calculators\"], \"offers\"\
+    : {\"@type\": \"Offer\", \"price\": \"0\", \"priceCurrency\": \"CAD\"}, \"audience\": {\"@type\": \"Audience\", \"audienceType\"\
+    : \"Developers deciding with AI: routing, scoring, classifying and gating\"}}, {\"@type\": \"WebSite\", \"@id\": \"https://jev-buddy.anvil.app/#site\"\
+    , \"url\": \"https://jev-buddy.anvil.app/\", \"name\": \"Jev Buddy\", \"publisher\": {\"@id\": \"https://arkvital.com/#org\"\
+    }}, {\"@type\": \"Organization\", \"@id\": \"https://arkvital.com/#org\", \"name\": \"Arkvital\", \"url\": \"https://arkvital.com\"\
+    , \"email\": \"arkvital@outlook.com\", \"address\": {\"@type\": \"PostalAddress\", \"addressLocality\": \"Montreal\",\
+    \ \"addressRegion\": \"QC\", \"addressCountry\": \"CA\"}}]}</script>\n<!-- seo:end -->\n<meta name=\"viewport\" content=\"\
+    width=device-width, initial-scale=1, viewport-fit=cover\">\n<meta name=\"theme-color\" content=\"#070b14\">\n<meta name=\"\
+    apple-mobile-web-app-capable\" content=\"yes\">\n<link rel=\"preconnect\" href=\"https://fonts.googleapis.com\">\n<link\
+    \ rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin>\n<link href=\"https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap\"\
     \ rel=\"stylesheet\">\n<link id=\"ui-favicon\" rel=\"icon\" type=\"image/svg+xml\" href=\"_/theme/icon.svg?v=c7bff55fed\"\
     >\n<link rel=\"apple-touch-icon\" href=\"_/theme/icon-180.png?v=c7bff55fed\">\n<script>\n/* Keep our tab icon: Anvil adds\
     \ its own <link rel=\"icon\">, so drop any other icon link. */\n(function () {\n  function keep() {\n    var ours = document.getElementById('ui-favicon');\n\

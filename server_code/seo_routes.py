@@ -58,8 +58,8 @@ SEO = {
   ]
  ],
  "free": True,
- "site": "",
- "updated": "2026-10-31",
+ "site": "https://jev-buddy.anvil.app",
+ "updated": "2026-11-01",
  "icon": "icon-512.png",
  "colors": {
   "bg": "#070b14",
