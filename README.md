@@ -7,7 +7,7 @@ shows twelve business use cases with routing code and costs, and has a playgroun
 It is an independent guide, not affiliated with TypeSafe or OpenRouter. Built on [Anvil](https://anvil.works).
 
 - **App repo:** github.com/arkulinskis/jev-buddy (branch `master`). Anvil pulls `master`.
-- **Live:** not published yet.
+- **Live:** https://jev-buddy.anvil.app
 
 ## What it does
 
