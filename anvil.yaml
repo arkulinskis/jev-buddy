@@ -318,7 +318,7 @@ metadata:
   title: 'Jev Buddy: the developer guide to the Jev decision model'
 name: Jev Buddy
 native_deps:
-  head_html: "<script src=\"_/theme/legal-kit.js?v=fa46d80110\"></script>\n<!-- seo:start (APP_MAKER/seo: edit seo/apps/jevbuddy.json\
+  head_html: "<script src=\"_/theme/legal-kit.js?v=c3f02ee1a5\"></script>\n<!-- seo:start (APP_MAKER/seo: edit seo/apps/jevbuddy.json\
     \ and run seo.py, not here) -->\n<link rel=\"canonical\" href=\"https://jev-buddy.anvil.app/\">\n<meta name=\"robots\"\
     \ content=\"index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1\">\n<meta name=\"keywords\" content=\"\
     Jev decision model, TypeSafe AI, AI classification API, LLM alternative for decisions, typed AI answers, calibrated probabilities\
@@ -362,7 +362,7 @@ native_deps:
     })();\n</script>\n\n<!-- Prepsto feedback panel: every \"Submit feedback\" link and button opens it (it is the only feedback\
     \ channel). No floating button, no cookies, nothing loads until it is opened. Codes: APP_MAKER/prepsto-links.json -->\n\
     <script src=\"https://prepsto.com/_/theme/widget.js\" data-prepsto=\"ntbztc7\" data-button=\"false\" data-label=\"Submit\
-    \ feedback\" async></script>\n<link rel=\"stylesheet\" href=\"_/theme/app.css?v=ed269aae04\">\n<script src=\"_/theme/app.js?v=9132ace5f7\"\
+    \ feedback\" async></script>\n<link rel=\"stylesheet\" href=\"_/theme/app.css?v=1bd4ad4817\">\n<script src=\"_/theme/app.js?v=a9b38dbc97\"\
     ></script>\n"
 package_name: Jev_Buddy
 runtime_options:
