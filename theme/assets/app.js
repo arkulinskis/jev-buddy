@@ -438,7 +438,7 @@
     },
     footer: function (me) {
       var link = function (go, label) { return '<a href="#' + go + '" data-go="' + go + '">' + label + '</a>'; };
-      return '<div class="ui-footer-in"><div class="ui-footer-brand">' + brand() + '<p class="muted small">' + esc(UI.config.tagline) + '</p></div>' +
+      return '<div class="ui-footer-in"><div class="ui-footer-brand">' + brand() + '<p class="muted small">' + esc(UI.config.tagline) + '</p><p class="small muted ui-footer-org">Contact developer: <a href="https://arkvital.com" target="_blank" rel="noopener">arkvital.com</a><br>Parent company: <a href="https://addanapp.com" target="_blank" rel="noopener">addanapp.com</a></p></div>' +
         '<div class="ui-footer-links">' +
         link('learn/quickstart', 'Quickstart') + link('learn/choice', 'Choice') + link('learn/noul', 'Noul') + link('learn/score', 'Score') +
         link('examples', 'Use cases') + link('tools', 'Cost calculator') + link('opensource', 'Open source') + link('learn/resources', 'Sources') +
