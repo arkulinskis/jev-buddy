@@ -27,21 +27,25 @@ SEO = {
   "calibrated probabilities API",
   "AI routing",
   "support ticket classification",
-  "AI cost calculator"
+  "AI cost calculator",
+  "open-source Jev alternative",
+  "Laya decision model",
+  "self-hosted decision model"
  ],
  "type": "WebApplication",
  "category": "DeveloperApplication",
  "audience": "Developers deciding with AI: routing, scoring, classifying and gating",
  "about": [
   "Jev Buddy is a free, multipage developer guide to Jev, TypeSafe AI's System One decision model. You send it state (text or JSON) and typed questions (choice, noul and score), and it returns typed answers with calibrated probabilities instead of text.",
-  "The site explains everything a developer needs, with code in Python, TypeScript, curl and TypeSafe's SDK, shows twelve business use cases with routing code and costs, and has a playground, saved recipes and calculators. It is an independent guide, not affiliated with TypeSafe or OpenRouter."
+  "The site explains everything a developer needs, with code in Python, TypeScript, curl and TypeSafe's SDK, shows twelve business use cases with routing code and costs, and has a playground, saved recipes and calculators. An Open source page shows how to install and use open alternatives such as Laya, Kev, jevos and Ollaya, so decisions run on your own machine and your data stays with you. It is an independent guide, not affiliated with TypeSafe or OpenRouter."
  ],
  "features": [
-  "A 15-chapter guide with code in Python, TypeScript, curl and the SDK",
+  "A 16-chapter guide with code in Python, TypeScript, curl and the SDK",
   "The three primitives explained: choice, noul and score",
   "Twelve business use cases with routing code and costs",
   "A playground and saved recipes",
-  "Cost calculators"
+  "Cost calculators",
+  "Open-source, self-hosted alternatives to Jev (Laya, Kev, jevos, Ollaya) with install and usage steps"
  ],
  "faq": [
   [
@@ -55,11 +59,15 @@ SEO = {
   [
    "Is the guide free?",
    "Yes. Everything is readable without an account."
+  ],
+  [
+   "Is there an open-source alternative to Jev?",
+   "Yes. Laya, Kev, jevos and Ollaya answer the same choice, yes/no and score questions on your own machine, and several accept the same request as TypeSafe's API. The Open source page has install steps for each."
   ]
  ],
  "free": True,
  "site": "https://jev-buddy.anvil.app",
- "updated": "2026-11-03",
+ "updated": "2026-11-05",
  "icon": "icon-512.png",
  "colors": {
   "bg": "#070b14",

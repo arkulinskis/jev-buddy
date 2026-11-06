@@ -441,7 +441,7 @@
       return '<div class="ui-footer-in"><div class="ui-footer-brand">' + brand() + '<p class="muted small">' + esc(UI.config.tagline) + '</p></div>' +
         '<div class="ui-footer-links">' +
         link('learn/quickstart', 'Quickstart') + link('learn/choice', 'Choice') + link('learn/noul', 'Noul') + link('learn/score', 'Score') +
-        link('examples', 'Use cases') + link('tools', 'Cost calculator') + link('learn/resources', 'Sources') +
+        link('examples', 'Use cases') + link('tools', 'Cost calculator') + link('opensource', 'Open source') + link('learn/resources', 'Sources') +
         '<a href="https://prepsto.com/#f/ntbztc7" target="_blank" rel="noopener" data-prepsto-open>Submit feedback</a>' +
         '<button type="button" data-lk-open="overview">Privacy &amp; Terms</button>' +
         '</div><p class="ui-footer-legal small muted">© ' + new Date().getFullYear() + ' Jev Buddy · An independent guide, not affiliated with TypeSafe or OpenRouter. ' +
@@ -510,6 +510,12 @@
   I.alert = '<path d="M12 3 2 20h20z"/><path d="M12 10v4M12 17h.01"/>';
   I.target = '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.3"/>';
   I.route = '<circle cx="6" cy="19" r="2"/><circle cx="18" cy="5" r="2"/><path d="M8 19h7a3.5 3.5 0 0 0 0-7H9a3.5 3.5 0 0 1 0-7h7"/>';
+  I.server = '<rect x="3" y="4" width="18" height="7" rx="2"/><rect x="3" y="13" width="18" height="7" rx="2"/><path d="M7 7.5h.01M7 16.5h.01M11 7.5h6M11 16.5h6"/>';
+  I.laptop = '<rect x="4" y="5" width="16" height="11" rx="1.5"/><path d="M2 19h20"/>';
+  I.apple = '<path d="M12 7c1.5-2 4-2 5 0-2 1-2 4 0 5-1 3-3 6-5 5-2 1-4-2-5-5-1-3 0-6 3-6 1 0 1.5.5 2 1z"/><path d="M12 7c0-2 1-3.5 2.5-4"/>';
+  I.gpu = '<rect x="2" y="7" width="20" height="10" rx="2"/><circle cx="9" cy="12" r="2.5"/><circle cx="16" cy="12" r="2.5"/><path d="M5 17v3M19 17v3"/>';
+  I.box = '<path d="m12 3 8 4.5v9L12 21l-8-4.5v-9z"/><path d="m4 7.5 8 4.5 8-4.5M12 12v9"/>';
+  I.unlock = '<rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 7.5-2"/>';
 
   JB.PRICE_PER_M = 0.042;   // USD per million input tokens on OpenRouter, Oct 2026 (output tokens are free)
   JB.MODEL = 'typesafe/jev-1.13';
@@ -789,6 +795,20 @@
         '  headers: {\n    Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,\n    "Content-Type": "application/json",\n  },\n  body: JSON.stringify(payload),\n});\n' +
         'if (!res.ok) throw new Error(`Jev error ${res.status}: ${await res.text()}`);\nconst { answers } = await res.json();\n\n' + readLines(req.questions, 'js');
     }
+    if (lang === 'local') {
+      // Same request to an open-source server on your own machine (Laya, Kev, jevos, Ollaya: POST /v1/systemone)
+      var lbody = { state: req.state, questions: req.questions };
+      return '# Self-hosted: an open-source decision model on your own machine. Nothing goes to TypeSafe or OpenRouter.\n' +
+        '# Start one first (see Jev Buddy > Open source), e.g.:  pip install "laya[serve]"  then  laya-serve\n' +
+        'import os\nimport requests\n\nBASE = os.environ.get("DECISIONS_URL", "http://127.0.0.1:8000")   # Laya 8000 · jevos 8017 · Ollaya 11435\n' +
+        'KEY = os.environ.get("DECISIONS_API_KEY")                           # only if you set LAYA_API_KEY, KEV_API_KEY...\n\n' +
+        'payload = ' + py(lbody) + '\n# payload["model"] = "kev-latest"   # only when your server hosts several models\n\n' +
+        'resp = requests.post(\n    BASE + "/v1/systemone",\n    headers={"Authorization": f"Bearer {KEY}"} if KEY else {},\n    json=payload,\n    timeout=30,\n)\nresp.raise_for_status()\n' +
+        'answers = resp.json()["answers"]\n\n' + Object.keys(req.questions).map(function (n) {
+          var t = req.questions[n].type;
+          return 'print("' + n + ':", answers["' + n + '"]["' + t + '"]' + (t === 'noul' ? '' : ', "confidence:", answers["' + n + '"].get("confidence")') + ')';
+        }).join('\n');
+    }
     if (lang === 'curl') {
       var json = JSON.stringify(body, null, 2).replace(/'/g, '\'"\'"\'');
       return 'curl ' + JB.ENDPOINT + ' \\\n  -H "Authorization: Bearer $OPENROUTER_API_KEY" \\\n  -H "Content-Type: application/json" \\\n  -d \'' + json + '\'';
@@ -814,7 +834,8 @@
     return [{ label: 'Python', key: 'python', lang: 'python', code: JB.gen(req, 'python') },
       { label: 'TypeScript', key: 'ts', lang: 'ts', code: JB.gen(req, 'ts') },
       { label: 'curl', key: 'curl', lang: 'bash', code: JB.gen(req, 'curl') },
-      { label: 'TypeSafe SDK', key: 'sdk', lang: 'python', code: JB.gen(req, 'sdk') }];
+      { label: 'TypeSafe SDK', key: 'sdk', lang: 'python', code: JB.gen(req, 'sdk') },
+      { label: 'Self-hosted', key: 'local', lang: 'python', code: JB.gen(req, 'local') }];
   };
   JB.reqJson = function (req) { return JSON.stringify({ model: req.model || JB.MODEL, state: req.state, questions: req.questions }, null, 2); };
 
@@ -1104,15 +1125,32 @@
 
     function jev() {
       return UI.api('admin_jev_settings').then(function (s) {
+        var self = s.provider === 'selfhosted';
+        var radio = function (v, label, sub) {
+          return '<label class="ad-prov"><input type="radio" name="provider" value="' + v + '"' + (s.provider === v ? ' checked' : '') + '><span><b>' + label + '</b><small>' + sub + '</small></span></label>';
+        };
         body.innerHTML = '<div class="ui-grid two"><form class="ui-card ui-stack" data-jev style="margin:0"><h3>Live playground runs</h3>' +
-          '<p class="muted small">With an OpenRouter key, signed-in members can run real Jev calls from the playground. The key stays on the server and is never sent to browsers. Each run is billed to that OpenRouter account (about $0.00001 a run).</p>' +
+          '<p class="muted small">Signed-in members can run real decisions from the playground. Pick where the text goes. Keys stay on the server and are never sent to browsers.</p>' +
+          '<div class="ad-provs" role="radiogroup" aria-label="Where live runs go">' +
+          radio('openrouter', 'Jev through OpenRouter', 'TypeSafe\'s closed model. The text goes to OpenRouter and TypeSafe; about $0.00001 a run.') +
+          radio('selfhosted', 'Your own open-source server', 'Laya, Kev, jevos, Ollaya… on a machine you run. The text stays with you.') + '</div>' +
+          '<fieldset class="ad-fs" data-prov="openrouter"' + (self ? ' hidden' : '') + '><legend>OpenRouter</legend>' +
           '<label class="ui-field"><span>OpenRouter API key ' + (s.has_key ? '<em>(saved, ends ' + esc(s.key_hint) + ')</em>' : '<em>(not set)</em>') + '</span><input type="password" name="key" autocomplete="off" placeholder="' + (s.has_key ? 'Leave empty to keep the saved key' : 'sk-or-v1-...') + '"></label>' +
           '<label class="ui-field"><span>Model</span><input name="model" value="' + esc(s.model) + '" spellcheck="false"></label>' +
+          (s.has_key ? '<button type="button" class="ui-btn sm danger" data-jev-clear="openrouter">' + UI.icon('trash') + 'Remove the OpenRouter key</button>' : '') + '</fieldset>' +
+          '<fieldset class="ad-fs" data-prov="selfhosted"' + (self ? '' : ' hidden') + '><legend>Your server</legend>' +
+          '<label class="ui-field"><span>Server address (HTTPS)</span><input name="base_url" type="url" inputmode="url" spellcheck="false" value="' + esc(s.base_url) + '" placeholder="https://decide.example.com"></label>' +
+          '<p class="muted small" style="margin:-4px 0 0">Any server that speaks TypeSafe\'s <code>POST /v1/systemone</code> format. We add <code>/v1/systemone</code> for you. Anvil runs on the internet, so <code>localhost</code> won\'t work: put the server behind HTTPS first (see <a href="#opensource/expose" data-go="opensource/expose">how</a>).</p>' +
+          '<label class="ui-field"><span>Server key ' + (s.has_local_key ? '<em>(saved, ends ' + esc(s.local_key_hint) + ')</em>' : '<em>(optional)</em>') + '</span><input type="password" name="local_key" autocomplete="off" placeholder="' + (s.has_local_key ? 'Leave empty to keep the saved key' : 'The value of LAYA_API_KEY, KEV_API_KEY…') + '"></label>' +
+          '<label class="ui-field"><span>Model name <em>(optional)</em></span><input name="local_model" value="' + esc(s.local_model) + '" spellcheck="false" placeholder="Empty if the server hosts one model, e.g. kev-latest"></label>' +
+          (s.base_url ? '<button type="button" class="ui-btn sm danger" data-jev-clear="selfhosted">' + UI.icon('trash') + 'Forget this server</button>' : '') +
+          '<div class="ui-note small">The Privacy Policy still says live runs go to OpenRouter and TypeSafe. Update it before switching live runs to your server.</div></fieldset>' +
           '<div class="ui-grid two" style="gap:10px"><label class="ui-field"><span>Shared runs per day</span><input type="number" name="daily_cap" min="1" value="' + s.daily_cap + '"></label>' +
           '<label class="ui-field"><span>Per person per hour</span><input type="number" name="per_user_hour" min="1" value="' + s.per_user_hour + '"></label></div>' +
-          '<label class="ui-check"><input type="checkbox" name="enabled"' + (s.enabled ? ' checked' : '') + (s.has_key ? '' : ' disabled') + '><span>Live runs on' + (s.has_key ? '' : ' <span class="muted small">(save a key first)</span>') + '</span></label>' +
+          '<label class="ui-check"><input type="checkbox" name="enabled"' + (s.enabled ? ' checked' : '') + '><span>Live runs on' + (s.ready ? '' : ' <span class="muted small">(save a key or a server address first)</span>') + '</span></label>' +
           '<div class="ui-row"><button class="ui-btn primary" type="submit">' + UI.icon('save') + 'Save</button>' +
-          (s.has_key ? '<button type="button" class="ui-btn" data-jev-test>' + UI.icon('play') + 'Test the key</button><button type="button" class="ui-btn danger" data-jev-clear>' + UI.icon('trash') + 'Remove key</button>' : '') + '</div>' +
+          (s.ready ? '<button type="button" class="ui-btn" data-jev-test>' + UI.icon('play') + (self ? 'Test the server' : 'Test the key') + '</button>' : '') + '</div>' +
+          (s.ready ? '<p class="muted small" style="margin:0">Live runs go to <code>' + esc(s.endpoint) + '</code>' + (self && s.local_model ? ' (model ' + esc(s.local_model) + ')' : '') + '.</p>' : '') +
           '<div data-jev-result></div></form>' +
           '<div class="ui-card" style="margin:0"><h3>Usage</h3><div class="ad-stats" style="margin-top:10px">' +
           [[s.live ? 'On' : 'Off', 'live runs'], [s.runs_today, 'runs today'], [s.errors_today, 'errors today'], [s.runs_total, 'runs in total'], ['$' + (s.cost_total || 0).toFixed(5), 'spent in total'], [s.avg_ms + ' ms', 'average latency']].map(function (x) {
@@ -1144,14 +1182,17 @@
       if (test) {
         UI.busy(test, UI.api('admin_test_jev')).then(function (r) {
           var a = r.response.answers.is_refund;
-          view.querySelector('[data-jev-result]').innerHTML = '<div class="ui-note">It works: ' + esc(r.response.model) + ' answered is_refund = ' + esc(a && a.noul) + ' in ' + r.ms + ' ms.</div>';
+          view.querySelector('[data-jev-result]').innerHTML = '<div class="ui-note">It works: ' + esc(r.response.model || 'your server') + ' answered is_refund = ' + esc(a && a.noul) + ' in ' + r.ms + ' ms.</div>';
         }, function (err) { view.querySelector('[data-jev-result]').innerHTML = '<div class="ui-error">' + esc(err.message) + '</div>'; });
         return;
       }
       var clr = e.target.closest('[data-jev-clear]');
       if (clr) {
-        UI.confirm({ title: 'Remove the OpenRouter key?', text: 'Live runs switch off and the playground goes back to the simulator.', ok: 'Remove', danger: true }).then(function (yes) {
-          if (yes) UI.api('admin_clear_jev_key').then(function () { UI.toast('Key removed', 'ok'); jev(); });
+        var which = clr.getAttribute('data-jev-clear');
+        UI.confirm(which === 'selfhosted'
+          ? { title: 'Forget your server?', text: 'The address and the server key are removed. If live runs used it, they switch off.', ok: 'Forget', danger: true }
+          : { title: 'Remove the OpenRouter key?', text: 'If live runs used it, they switch off and the playground goes back to the simulator.', ok: 'Remove', danger: true }).then(function (yes) {
+          if (yes) UI.api('admin_clear_jev_key', which).then(function () { UI.toast(which === 'selfhosted' ? 'Server forgotten' : 'Key removed', 'ok'); jev(); });
         });
       }
     });
@@ -1179,6 +1220,10 @@
       }
     });
     view.addEventListener('change', function (e) {
+      if (e.target.name === 'provider') {
+        view.querySelectorAll('[data-prov]').forEach(function (fs) { fs.hidden = fs.getAttribute('data-prov') !== e.target.value; });
+        return;
+      }
       var row = e.target.closest('tr[data-id]');
       if (!row) return;
       var id = row.getAttribute('data-id'), box = e.target;
@@ -1462,15 +1507,20 @@
         }).join('') + '</div><div style="text-align:center;margin-top:20px"><a class="ui-btn" href="#examples" data-go="examples">All 12 use cases ' + UI.icon('arrow') + '</a></div></div></section>' +
 
       '<section class="lp-section"><div class="ui-wrap"><div class="lp-head"><div class="eyebrow">Who it\'s for</div><h2>Something for everyone on the team</h2></div><div class="lp-aud">' +
-        '<div class="ui-card">' + UI.icon('code') + '<h3>Developers</h3><ul><li>A 15-chapter guide, from first call to production</li><li>Code in Python, TypeScript and curl, plus TypeSafe\'s SDK</li><li>A playground that writes the code for you</li></ul></div>' +
+        '<div class="ui-card">' + UI.icon('code') + '<h3>Developers</h3><ul><li>A 16-chapter guide, from first call to production</li><li>Code in Python, TypeScript and curl, plus TypeSafe\'s SDK</li><li>A playground that writes the code for you</li></ul></div>' +
         '<div class="ui-card">' + UI.icon('layers') + '<h3>Product and ops leads</h3><ul><li>Twelve worked business cases</li><li>Where to put humans in the loop</li><li>A threshold simulator to set automation levels</li></ul></div>' +
         '<div class="ui-card">' + UI.icon('wallet') + '<h3>Founders and finance</h3><ul><li>A cost calculator against your current LLM</li><li>Monthly cost for every use case</li><li>Honest limits: when not to use it</li></ul></div></div></div></section>' +
+
+      '<section class="lp-section"><div class="ui-wrap"><div class="lp-band lp-os"><div><div class="eyebrow">' + UI.icon('unlock') + 'Open source</div><h2>Rather keep your data at home?</h2>' +
+        '<p>Jev only runs on TypeSafe\'s servers. Laya, Kev, jevos and Ollaya answer the same choice, yes/no and score questions on your own machine, and several take the exact same request. We show you how to install and use each one.</p></div>' +
+        '<div class="ui-row"><a class="ui-btn primary lg" href="#opensource" data-go="opensource">' + UI.icon('unlock') + 'Open-source alternatives</a></div></div></div></section>' +
 
       '<section class="lp-section"><div class="ui-wrap"><div class="lp-head"><h2>Questions</h2></div><div class="lp-faq">' + [
         ['What exactly is Jev?', 'A "System One" decision model from TypeSafe AI, launched in September 2026. You give it state and typed questions; it returns choices, yes/no probabilities and scores. It never generates text.'],
         ['Is Jev Buddy made by TypeSafe?', 'No. Jev Buddy is an independent guide. We link every source we used, and the official docs always win.'],
         ['Do I need an account here?', 'No. The guide, use cases, tools and playground simulator are free and open. An account lets you save and share recipes, and run real Jev calls in the playground when live runs are switched on.'],
         ['Is the playground real?', 'It shows a clearly labelled simulation (keyword overlap) unless live runs are on, in which case signed-in members get real Jev answers through OpenRouter. The Code tab gives you a script to run with your own key either way.'],
+        ['Can I use it without sending data to TypeSafe?', 'Not with Jev itself: it is closed and only runs on TypeSafe\'s servers. Open-source models such as Laya, Kev and jevos run on your own computer or server and answer the same kinds of questions. Our Open source page shows how to install and call each one, and the playground\'s Code tab has a Self-hosted version of every request.'],
         ['Can Jev extract names, amounts or dates?', 'Not directly: it doesn\'t write text. It answers questions with answer spaces you define (categories, yes/no, levels). Pair it with a parser or an LLM for free values; the guide shows how.'],
         ['How accurate is it?', 'Very good on simple, focused questions; less so on complex or ambiguous ones, which then get lower confidence. Measure it on a labelled sample of your own data before automating anything that matters.']
       ].map(function (q) { return '<details><summary>' + esc(q[0]) + '</summary><p>' + esc(q[1]) + '</p></details>'; }).join('') + '</div></div></section>' +
@@ -1739,8 +1789,29 @@
           '<h2 id="ecosystem">Around the ecosystem</h2><ul>' +
           '<li><b>Langfuse</b> has "decision model evaluators": score your LLM traces with Jev questions (1 to 50 questions per evaluator, 2 to 255 choice options, 2 to 10 score levels). Cheaper than LLM-as-a-judge, but no written reasoning.</li>' +
           '<li><b>jevkit</b> (<code>pip install jevkit</code>) is a small <i>unofficial</i> community wrapper for OpenRouter\'s Decisions API with a confidence <code>gate()</code> helper.</li>' +
-          '<li><b>Other decision models</b> accept the same request format on OpenRouter and NanoGPT (for example Liquid D1, Perplexity\'s Decider and Cloudflare\'s Clef, some of which read images). If you switch, re-check your thresholds.</li></ul>' +
+          '<li><b>Other decision models</b> accept the same request format on OpenRouter and NanoGPT (for example Liquid D1, Perplexity\'s Decider and Cloudflare\'s Clef, some of which read images). If you switch, re-check your thresholds.</li>' +
+          '<li><b>Open-source models you run yourself</b> (Laya, Kev, jevos, Ollaya) take TypeSafe\'s request on your own machine, so nothing leaves it. See ' + link('learn/self-host', 'Self-hosting: open-source alternatives') + '.</li></ul>' +
           co('Images: OpenRouter\'s Decisions API also defines image <code>assets</code> and a <code>box</code> question type for models that read pictures. TypeSafe describes Jev as text-only for now, so plan on text.', '', 'image');
+      } },
+
+    { id: 'self-host', group: 'Reference', icon: 'unlock', mins: 5, title: 'Self-hosting: open-source alternatives', blurb: 'Keep your data at home: Laya, Kev, jevos and Ollaya answer the same questions on your own machine.',
+      body: function () {
+        return '<p class="lead">Jev is closed and hosted: every state you send goes to TypeSafe, directly or through OpenRouter or NanoGPT. If that\'s not acceptable for your data, open-source decision models answer the same choice, noul and score questions on hardware you control.</p>' +
+          '<h2 id="five">Five minutes with Laya</h2><p>Laya (Apache-2.0, from Convai Innovations) is the best-known option: a 421M-parameter model that runs on a laptop CPU. Its server speaks TypeSafe\'s <code>POST /v1/systemone</code>, so your questions don\'t change.</p>' +
+          code({ lang: 'bash', label: 'terminal', code: 'python -m pip install "laya[serve]"\n\nexport LAYA_API_KEY="pick-a-long-random-secret"   # it has no password otherwise\nexport LAYA_HOST=127.0.0.1                         # only this computer can reach it\nlaya-serve                                         # http://127.0.0.1:8000' }) +
+          tabs3('import os\nimport requests\n\nr = requests.post(\n    "http://127.0.0.1:8000/v1/systemone",\n    headers={"Authorization": f"Bearer {os.environ[\'LAYA_API_KEY\']}"},\n    json={\n        "state": "Hi, I was charged twice for my order last week. Can I get one of those payments back?",\n        "questions": {"is_refund": {"type": "noul", "instructions": "Is the customer asking for a refund?"}},\n    },\n    timeout=30,\n)\nprint(r.json()["answers"]["is_refund"]["noul"])',
+            'const res = await fetch("http://127.0.0.1:8000/v1/systemone", {\n  method: "POST",\n  headers: { Authorization: `Bearer ${process.env.LAYA_API_KEY}`, "Content-Type": "application/json" },\n  body: JSON.stringify({\n    state: "Hi, I was charged twice for my order last week. Can I get one of those payments back?",\n    questions: { is_refund: { type: "noul", instructions: "Is the customer asking for a refund?" } },\n  }),\n});\nconsole.log((await res.json()).answers.is_refund.noul);') +
+          '<h2 id="which">Which one?</h2>' +
+          JB.table(['If you…', 'Try', 'Why'], [
+            ['write Python, any computer', '<b>Laya</b>', '<code>pip install</code>, fast, Apache-2.0'],
+            ['prefer an installer or desktop app', '<b>Ollaya</b>', '"Ollama for decision models": pulls Laya, Kev, d1 and more'],
+            ['have an NVIDIA GPU or a big Mac', '<b>Kev</b>', 'Closest to Jev in its own tests; TypeSafe\'s SDK works unchanged'],
+            ['want one program, no Python', '<b>jevos</b>', 'CPU only, about 1 GB of memory, MIT'],
+            ['build in Node.js', '<b>@receptron/laya</b>', 'Laya in-process with ONNX Runtime']]) +
+          '<h2 id="tradeoffs">What you give up</h2><ul><li><b>Some accuracy, out of the box.</b> In their authors\' own tests most open models score below Jev, especially with many options per question (Laya: 0.425 vs 0.870 on a 77-option set). Fine-tuning on your own labels closes much of the gap.</li>' +
+          '<li><b>Calibration needs a step.</b> Laya ships over-confident; fit a temperature on labelled data, then re-tune your thresholds.</li>' +
+          '<li><b>You run it.</b> Updates, uptime and security are yours: set the API key, keep it on 127.0.0.1 or behind HTTPS.</li></ul>' +
+          co('Install guides for every option (pip, Docker, Windows, Mac, Node), a comparison table, a safety checklist and a script to compare models on your own data are on the ' + link('opensource', 'Open source page') + '.', 'good', 'unlock');
       } },
 
     { id: 'criteria', group: 'Reference', icon: 'edit', mins: 4, title: 'Writing good questions', blurb: 'Atomic questions, sharp criteria, escape hatches and trimmed state.',
@@ -1807,7 +1878,8 @@
           ['https://docs.nano-gpt.com/api-reference/endpoint/jev-decisions.md', 'NanoGPT: Decisions endpoint', 'Another host for Jev and other decision models, with limits per model.'],
           ['https://www.firecrawl.dev/blog/openai-decisions-api-vs-jev', 'Firecrawl: OpenAI\'s Decisions API vs Jev', 'Launch date, pricing, latency figures and a comparison with OpenAI\'s preview.'],
           ['https://langfuse.com/docs/evaluation/evaluation-methods/decision-models', 'Langfuse: Decision model evaluators', 'Using Jev to evaluate LLM traces.'],
-          ['https://pypi.org/project/jevkit/', 'jevkit on PyPI', 'An unofficial community Python wrapper.']];
+          ['https://pypi.org/project/jevkit/', 'jevkit on PyPI', 'An unofficial community Python wrapper.'],
+          ['https://huggingface.co/convaiinnovations/laya', 'Laya model card (checked 5 Nov 2026)', 'The open-source alternative used in the self-hosting chapter. More sources on the Open source page.']];
         return '<p class="lead">Jev Buddy is an independent guide. Every fact here comes from the pages below; prices, limits and endpoints can change, so check them before you ship.</p>' +
           '<div class="lr-src">' + S.map(function (s) { return '<a href="' + s[0] + '" target="_blank" rel="noopener"><b>' + esc(s[1]) + '</b> ' + UI.icon('external') + '<span>' + esc(s[2]) + '</span><code>' + esc(s[0].replace('https://', '')) + '</code></a>'; }).join('') + '</div>' +
           co('Prices and latency figures are as reported in October 2026 ($0.042 per million input tokens and $0 for output on OpenRouter; 0.21 s median latency). Sample outputs in this guide are illustrative, in the exact shape Jev returns.', '', 'info');
@@ -1832,7 +1904,7 @@
     var r = readMap();
     if (!ch) {
       view.innerHTML = '<div class="ui-wrap"><div class="lr-idx-head"><div><div class="eyebrow">The Jev guide</div><h1 style="margin:0 0 8px">Everything a developer needs to ship Jev</h1>' +
-        '<p class="muted" style="font-size:1.1rem;margin:0">Fifteen short chapters, from your first call to production patterns. Every code sample comes in Python, TypeScript and curl, and the tabs remember your language.</p></div>' +
+        '<p class="muted" style="font-size:1.1rem;margin:0">Sixteen short chapters, from your first call to production patterns and self-hosting. Every code sample comes in Python, TypeScript and curl, and the tabs remember your language.</p></div>' +
         '<div class="ui-card">' + progress() + '<a class="ui-btn primary block" href="#learn/' + (CH.filter(function (c) { return !r[c.id]; })[0] || CH[0]).id + '" data-go="learn/' + (CH.filter(function (c) { return !r[c.id]; })[0] || CH[0]).id + '">' +
         UI.icon('play') + (Object.keys(r).length ? 'Continue reading' : 'Start with chapter 1') + '</a></div></div>' +
         groups().map(function (g) {
@@ -1867,6 +1939,283 @@
     }
     timer = setTimeout(function () { markRead(id); }, 45000);
     return { ready: Promise.resolve(), destroy: function () { clearTimeout(timer); if (io) io.disconnect(); } };
+  });
+})();
+
+/* ===== opensource.html ===== */
+(function () {
+  var esc = UI.esc;
+  var code = function (b, t) { return JB.code(b, t); };
+  var co = JB.callout;
+  var CHECKED = '5 November 2026';
+  function sh(label, c) { return code({ lang: 'bash', label: label, code: c }); }
+  function ext(url, label) { return '<a href="' + url + '" target="_blank" rel="noopener">' + UI.icon('external') + esc(label || url.replace('https://', '')) + '</a>'; }
+  function badge(text, kind) { return '<span class="ui-badge ' + (kind || '') + '">' + esc(text) + '</span>'; }
+
+  /* Hardware tags used by the picker */
+  var HW = [['all', 'Anything', 'grid'], ['cpu', 'Laptop or server, no GPU', 'laptop'], ['mac', 'Apple Silicon Mac', 'apple'],
+    ['gpu', 'NVIDIA GPU', 'gpu'], ['node', 'Inside a Node.js app', 'code'], ['app', 'An app, little code', 'box']];
+
+  /* The options. Every fact is from the project's own README or model card (links in each section). */
+  var OPTS = [
+    { id: 'laya', name: 'Laya', maker: 'Convai Innovations', lic: 'Apache-2.0', size: '421M (English) · 322M (100+ languages)', hw: ['cpu', 'gpu', 'node', 'app'],
+      server: 'laya-serve · port 8000', status: ['Active', 'good'], best: 'Start here',
+      pitch: 'The best-known open alternative. A small, fast model you install with pip. Its server takes the same request as TypeSafe\'s API.' },
+    { id: 'ollaya', name: 'Ollaya', maker: 'Mert Cobanov', lic: 'Apache-2.0 (each model has its own)', size: 'Serves 29 model families', hw: ['cpu', 'mac', 'gpu', 'app'],
+      server: 'port 11435', status: ['Active', 'good'], best: 'Easiest',
+      pitch: '"Ollama for decision models": one installer or desktop app that downloads and serves Laya, Kev, d1 and more behind one address.' },
+    { id: 'kev', name: 'Kev', maker: 'Jared Palmer', lic: 'Apache-2.0', size: '0.8B · 4B · 9B · 27B', hw: ['gpu', 'mac', 'cpu'],
+      server: 'kev.serve · any port (8009 in docs)', status: ['Active', 'good'], best: 'Closest to Jev',
+      pitch: 'Built as a drop-in: TypeSafe\'s own SDK works unchanged. Bigger models, so it wants a GPU or a Mac with plenty of memory.' },
+    { id: 'jevos', name: 'jevos', maker: 'feder-cr', lic: 'MIT', size: 'About 1 GB of memory', hw: ['cpu'],
+      server: 'jev serve · port 8017', status: ['Active', 'good'], best: 'No Python',
+      pitch: 'One program, CPU only. Download, unzip, run. Yes/no questions are its strength; scores are still early.' },
+    { id: 'd1', name: 'd1-omni-600M', maker: 'Liquid AI', lic: 'LFM Open License v1.0', size: '587M · text, images and audio', hw: ['cpu', 'mac', 'gpu'],
+      server: 'None: call it from Python', status: ['Research release', 'warn'],
+      pitch: 'A small model that also reads pictures and sound. Python only, no server. Read the licence before commercial use.' },
+    { id: 'semif', name: 'SemIf', maker: 'TheoLeeCJ', lic: 'MIT (code)', size: 'Uses Qwen3.5-4B, Qwen3-0.6B or MiniCPM5-2B', hw: ['gpu', 'cpu', 'mac'],
+      server: 'None: a command-line batch tool', status: ['Active', 'good'],
+      pitch: 'Scores a file of decisions offline with a small open LLM. Good for batch jobs and research, not for a live API.' },
+    { id: 'von', name: 'Von', maker: 'wfzyx', lic: 'Apache-2.0', size: '395M', hw: ['cpu', 'gpu'],
+      server: 'von serve · port 8000', status: ['Archived', 'bad'],
+      pitch: 'Archived on 19 October 2026 and no longer updated. Listed so you know; don\'t start new projects on it.' }
+  ];
+
+  /* ---------------------------------------------------------------- the switch */
+  var SWITCH_PY = '# Before: Jev through OpenRouter\n# URL = "https://openrouter.ai/api/alpha/decisions"\n\n# After: your own open-source server (Laya, Kev, jevos, Ollaya...)\nimport os\nimport requests\n\nBASE = os.environ.get("DECISIONS_URL", "http://127.0.0.1:8000")\nKEY = os.environ.get("DECISIONS_API_KEY")          # if you set one on the server\n\n\ndef ask(state, questions, model=None):\n    body = {"state": state, "questions": questions}\n    if model:                                     # only if the server hosts several models\n        body["model"] = model\n    r = requests.post(BASE + "/v1/systemone", json=body, timeout=30,\n                      headers={"Authorization": f"Bearer {KEY}"} if KEY else {})\n    r.raise_for_status()\n    return r.json()["answers"]';
+  var SWITCH_SDK = '# TypeSafe\'s own SDK, pointed at your server instead of api.typesafe.ai\n# (this exact line is from Kev\'s model card)\nfrom typesafe_sdk import Choice, Noul, TypeSafeClient\n\nclient = TypeSafeClient(api_key="local", base_url="http://127.0.0.1:8008", model="kev-latest")\n\n# or set it once for every script:\n#   export TYPESAFE_BASE_URL=http://localhost:11435     (Ollaya\'s port)';
+  var SWITCH_TS = 'const BASE = process.env.DECISIONS_URL ?? "http://127.0.0.1:8000";\nconst KEY = process.env.DECISIONS_API_KEY;\n\nexport async function ask(state: unknown, questions: Record<string, unknown>) {\n  const res = await fetch(`${BASE}/v1/systemone`, {\n    method: "POST",\n    headers: { "Content-Type": "application/json", ...(KEY ? { Authorization: `Bearer ${KEY}` } : {}) },\n    body: JSON.stringify({ state, questions }),\n  });\n  if (!res.ok) throw new Error(`decision server ${res.status}: ${await res.text()}`);\n  return (await res.json()).answers;\n}';
+  var SWITCH_CURL = 'curl -s http://127.0.0.1:8000/v1/systemone \\\n  -H "Content-Type: application/json" \\\n  -d \'{\n    "state": "I was charged twice. Please fix this ASAP.",\n    "questions": {\n      "billing": {"type": "noul", "instructions": "Is this ticket about billing?"}\n    }\n  }\'';
+
+  /* ---------------------------------------------------------------- one section per option */
+  function optHead(o) {
+    return '<section class="os-sec os-opt" id="os-' + o.id + '"><h2>' + esc(o.name) + '</h2><div class="badges">' + badge(o.status[0], o.status[1]) + badge(o.lic, 'mono') +
+      badge(o.size) + badge(o.maker) + (o.best ? badge(o.best, 'brand') : '') + '</div><p class="sub">' + esc(o.pitch) + '</p>';
+  }
+  var BODY = {
+    laya: function () {
+      return '<h3>1. Install</h3><p>Python 3.10 or newer. A virtual environment keeps it tidy:</p>' +
+        code([{ label: 'macOS / Linux', key: 'unix', lang: 'bash', code: 'python3 -m venv .venv && source .venv/bin/activate\npython -m pip install "laya[serve]"      # the model + its HTTP server' },
+          { label: 'Windows', key: 'win', lang: 'bash', code: 'py -3.11 -m venv .venv\n.\\.venv\\Scripts\\python.exe -m pip install "laya[serve]"' }]) +
+        '<p>The first run downloads the model from Hugging Face (about 800 MB for English, 650 MB for the multilingual one). After that it can run offline.</p>' +
+        '<h3>2. Use it straight from Python</h3><p>No server needed. <code>Router</code> picks the right checkpoint for you (English, multilingual, or the one tuned for typed decisions):</p>' +
+        code({ lang: 'python', label: 'laya_router.py (from the model card)', code: 'from laya import Router\n\nrouter = Router()  # downloads a checkpoint on first use; Router(preload=True) loads all three up front\n\nstate = "Hi, we were billed twice for March. Please refund the duplicate today or we will cancel our plan."\nquestions = {\n    "department": {"type": "choice", "instructions": "Which department should handle this?",\n                   "criteria": {"billing": "invoices, payments, refunds",\n                                "technical": "bugs, outages, system errors",\n                                "other": "everything else"}},\n    "urgency": {"type": "score", "instructions": "How urgent is this?",\n                "criteria": ["not urgent", "soon", "blocking"]},\n    "churn_risk": {"type": "noul", "instructions": "Does the user threaten to cancel or leave?"},\n}\n\nresult = router.predict(state, questions)\nprint(result["answers"]["department"]["choice"])  # billing\nprint(result["answers"]["churn_risk"]["noul"])    # probability the answer is yes\nprint(result["routing"]["model"])                 # english' }) +
+        '<h3>3. Or run it as a Jev-compatible server</h3><p><code>laya-serve</code> answers <code>POST /v1/systemone</code> with the same request and response shape as TypeSafe\'s API, so existing code only needs a new base URL.</p>' +
+        co('<b>Lock it down first.</b> Laya\'s server listens on every network address (<code>0.0.0.0</code>) with no password unless you set <code>LAYA_API_KEY</code>. Set a key, and keep it on <code>127.0.0.1</code> unless other machines need it.', 'warn', 'lock') +
+        code([{ label: 'macOS / Linux', key: 'unix', lang: 'bash', code: 'export LAYA_API_KEY="pick-a-long-random-secret"\nexport LAYA_HOST=127.0.0.1          # only this computer can reach it\nexport LAYA_PRELOAD=1              # load the models at start, not on the first request\n# export LAYA_DEVICE=cuda          # with an NVIDIA GPU\nlaya-serve                         # port 8000' },
+          { label: 'Windows', key: 'win', lang: 'bash', code: '$env:LAYA_API_KEY = "pick-a-long-random-secret"\n$env:LAYA_HOST = "127.0.0.1"\n$env:LAYA_PRELOAD = "1"\nlaya-serve' }]) +
+        code({ lang: 'bash', label: 'call it', code: 'curl -s localhost:8000/v1/systemone \\\n  -H "Authorization: Bearer $LAYA_API_KEY" \\\n  -H "Content-Type: application/json" -d \'{\n  "state": {"document": "I was charged twice. Please fix this ASAP."},\n  "questions": {"billing": {"type": "noul", "instructions": "Is this ticket about billing?"}}\n}\'' }) +
+        '<h3>4. With Docker</h3><p>Laya\'s repository has Docker files (there is no ready-made image to pull; you build it). Its compose setup publishes the port on <code>127.0.0.1</code> only:</p>' +
+        sh('terminal', 'git clone https://github.com/NandhaKishorM/laya.git && cd laya\ndocker compose -f compose.yaml -f compose.http.yaml up --build laya-serve\ncurl -s localhost:8000/health\n\n# once the model is downloaded, never contact Hugging Face again:\ndocker run --rm -e HF_HUB_OFFLINE=1 -p 127.0.0.1:8000:8000 laya:local laya-serve') +
+        '<h3>5. Inside a Node.js app (no server)</h3><p><code>@receptron/laya</code> is a community wrapper that runs Laya in-process with ONNX Runtime. Node.js 20+, about 2 GB of memory, a 1.7 GB download on first use.</p>' +
+        code([{ label: 'install', key: 'npm', lang: 'bash', code: 'npm install @receptron/laya' }, { label: 'TypeScript', key: 'ts', lang: 'ts', code: 'import { Laya } from "@receptron/laya";\n\nconst laya = await Laya.load();\n\nconst result = await laya.systemOne(\n  { subject: "Refund not received", body: "I cancelled two weeks ago and still have no refund..." },\n  {\n    department: {\n      type: "choice",\n      instructions: "Which team should handle this ticket?",\n      criteria: { billing: "payments, refunds, invoices", support: "product help and bugs", sales: "new purchases" },\n    },\n    urgency: {\n      type: "score",\n      instructions: "How urgent is this ticket?",\n      criteria: ["not urgent", "somewhat urgent", "urgent", "critical"],\n    },\n    churn_risk: { type: "noul", instructions: "Is the customer likely to cancel or dispute?" },\n  },\n);\n\nresult.answers.department.choice; // "billing"\nresult.answers.department.probabilities; // { billing: 0.9415, support: 0.031, sales: 0.0275 }\nresult.answers.urgency.score; // 1.3886   (expected level, 0..3)\nresult.answers.churn_risk.noul; // 0.0988   (P(true))\n\nawait laya.close();' }]) +
+        '<h3>Good to know</h3><ul>' +
+        '<li><b>Which checkpoint:</b> <code>convaiinnovations/laya</code> is English (512 tokens of state). <code>laya-multilingual</code> covers 100+ languages and 1,024 tokens (up to 8,192). <code>laya-typed-decisions</code> is tuned for Jev-style questions. The Router picks for you.</li>' +
+        '<li><b>Out of the box it is less accurate than Jev on hard sets.</b> Its own card says the base checkpoints are "near chance" on the typed-decisions benchmark (0.362, random is 0.318). The headline 0.766 (vs Jev\'s published 0.727) is the checkpoint fine-tuned on that benchmark\'s training data.</li>' +
+        '<li><b>Keep choices under about 20 options.</b> On a 77-option banking set it scored 0.425 against Jev\'s 0.870. Split big lists into two questions.</li>' +
+        '<li><b>Scores are its weakest type,</b> and it ships over-confident: fit a temperature on your own labelled data before you trust its probabilities as thresholds.</li>' +
+        '<li><b>Yes/no quirk:</b> the card warns a <code>noul</code> can follow its option labels instead of the text on the English checkpoint. Its fix: ask a two-option <code>choice</code> instead.</li>' +
+        '<li><b>Speed:</b> about 33 ms per request on a T4 GPU, 0.2 to 0.5 s on a CPU (the card\'s own figures).</li></ul>' +
+        co('<b>laya-ai.com and laya.studio are not the project.</b> Both say they are independent sites, and laya-ai.com sells a hosted API key. Using a hosted API sends your text to whoever runs it, which is what you are trying to avoid. Install the package instead.', 'warn') +
+        '<div class="os-links">' + ext('https://github.com/NandhaKishorM/laya', 'GitHub: NandhaKishorM/laya') + ext('https://huggingface.co/convaiinnovations/laya', 'Model card') + ext('https://pypi.org/project/laya/', 'PyPI: laya') +
+        ext('https://nandhakishorm.github.io/laya/docker/', 'Docker docs') + ext('https://github.com/receptron/laya', 'Node: receptron/laya') + '</div>';
+    },
+    ollaya: function () {
+      return '<h3>1. Install</h3>' +
+        code([{ label: 'macOS / Linux', key: 'unix', lang: 'bash', code: 'curl -fsSL https://ollaya.dev/install.sh | sh' },
+          { label: 'Windows', key: 'win', lang: 'bash', code: 'irm https://ollaya.dev/install.ps1 | iex' },
+          { label: 'Docker', key: 'docker', lang: 'bash', code: '# CPU only (127.0.0.1 keeps it on this computer)\ndocker run -d -p 127.0.0.1:11435:11435 ghcr.io/ollaya-dev/ollaya\n\n# NVIDIA GPU\ndocker run -d --gpus=all -p 127.0.0.1:11435:11435 ghcr.io/ollaya-dev/ollaya:cuda' }]) +
+        '<p>Or download the desktop app (macOS, Windows, Linux) from ' + ext('https://ollaya.dev/download', 'ollaya.dev/download') + '. Piping a script into your shell runs it as you: open the URL and read it first if you\'re unsure.</p>' +
+        '<h3>2. Pull a model and ask it something</h3><p>The commands work like Ollama\'s (<code>serve</code>, <code>run</code>, <code>pull</code>, <code>list</code>, <code>ps</code>, <code>rm</code>…). If the server isn\'t running, the command starts it.</p>' +
+        sh('terminal', '# no NVIDIA GPU? its README points you to laya (laya:multilingual on CPU)\nollaya pull laya\nollaya list\n\n# examples from its README\nollaya run winnow:e4b --preset triage "Third time this year you\'ve double-charged me. Refund it today or I\'m cancelling and moving to a competitor."\nollaya run kev --ask "Is a refund requested?" --ask "Which team?" --choice billing --choice sales < ticket.txt') +
+        '<h3>3. Call it from your code</h3><p>It serves <code>POST /v1/systemone</code> on port 11435. TypeSafe\'s SDK works unchanged: set its base URL and name the open model you pulled.</p>' +
+        code({ lang: 'bash', label: 'call it', code: 'export TYPESAFE_BASE_URL=http://localhost:11435\n\ncurl -s localhost:11435/v1/systemone -H "Content-Type: application/json" -d \'{\n  "model": "laya",\n  "state": "My invoice shows a charge I do not recognize.",\n  "questions": {"billing": {"type": "noul", "instructions": "Is this a billing problem?"}}\n}\'' }) +
+        '<h3>Good to know</h3><ul><li><b>Models it can pull</b> include laya (en, multilingual, typed-decisions), kev (0.8b, 4b-fp16, 9b), decider, d1 and d1-omni, clef, pplx-decider, von, jevk5, gliclass, nli, qwen3guard and more.</li>' +
+        '<li><b>Licences differ per model.</b> Ollaya itself is Apache-2.0, but for example <code>nimble:9b-v3</code> is CC BY-NC 4.0 (no commercial use) and d1 uses the LFM Open License. Check before you ship.</li>' +
+        '<li><b>Settings</b> are environment variables: <code>OLLAYA_HOST</code>, <code>OLLAYA_MODELS</code>, <code>OLLAYA_KEEP_ALIVE</code>, <code>OLLAYA_DEVICE</code>, and <code>OLLAYA_API_KEY</code> to require a key.</li>' +
+        '<li><b>Downloads come from Hugging Face</b> and the model authors. Your decisions stay on your machine; its README says your data doesn\'t leave it.</li>' +
+        '<li>It\'s an independent project, not linked to Ollama or TypeSafe.</li></ul>' +
+        '<div class="os-links">' + ext('https://github.com/ollaya-dev/ollaya', 'GitHub: ollaya-dev/ollaya') + ext('https://ollaya.dev', 'ollaya.dev') + '</div>';
+    },
+    kev: function () {
+      return '<h3>Pick a size</h3>' +
+        JB.table(['Model', 'NVIDIA GPU', 'Mac', 'Notes'], [
+          ['<code>jaredpalmer/kev-0.8b</code>', 'L4, any 4 GB GPU', 'Any Apple Silicon Mac', 'Smallest; the easy start'],
+          ['<code>jaredpalmer/kev-4b</code>', 'L40S, H100 (about 16 GB free)', '32 GB Mac', 'The README says "Start with Kev-4B"'],
+          ['<code>jaredpalmer/kev-9b</code>', 'L40S, H100', '32 GB Mac or larger (not measured)', 'More accurate, more memory'],
+          ['<code>kev-27b</code>', 'B200, H200, H100 80 GB', '96 to 128 GB Mac (not measured)', '65,536 tokens of state']]) +
+        '<h3>1. Install and start the server</h3><p>Needs Python 3.12 or 3.13 and <a href="https://docs.astral.sh/uv/" target="_blank" rel="noopener">uv</a>.</p>' +
+        co('<b>Don\'t run <code>pip install kev</code>.</b> That installs an unrelated package with the same name. Kev is installed from its GitHub repository.', 'warn') +
+        sh('terminal', 'git clone https://github.com/jaredpalmer/kev.git && cd kev\nuv sync --extra serve\nuv run --extra serve python -m kev.serve --run jaredpalmer/kev-4b --port 8009\n\n# smaller and lighter:\n# KEV_DTYPE=bf16 uv run --extra serve python -m kev.serve --run jaredpalmer/kev-0.8b --port 8009\n# no GPU at all (slow, fp32):  add --device cpu') +
+        '<p>The server listens on <code>127.0.0.1</code> only (add <code>--host 0.0.0.0</code> to accept other machines) and has no password until you set <code>KEV_API_KEY</code>; then it requires <code>Authorization: Bearer &lt;key&gt;</code>.</p>' +
+        '<h3>2. Call it</h3>' +
+        code([{ label: 'curl', key: 'curl', lang: 'bash', code: 'curl -s localhost:8009/v1/systemone -H \'content-type: application/json\' -d \'{\n  "state": "Shoes arrived two weeks late and in the wrong size. Also I see two charges on my card.",\n  "model": "kev-latest",\n  "questions": {\n    "department":  {"type": "choice", "instructions": "Which team should handle this?",\n                    "criteria": {"returns": "Exchanges, refunds, wrong or damaged items",\n                                 "shipping": "Delivery status, delays, lost packages",\n                                 "billing": "Charges, invoices, payment problems"}},\n    "escalate":    {"type": "noul",  "instructions": "Does this need urgent human attention?"},\n    "frustration": {"type": "score", "instructions": "How frustrated is the customer?",\n                    "criteria": ["Calm", "Frustrated", "Very angry"]}\n  }}\'' },
+          { label: 'TypeSafe SDK', key: 'sdk', lang: 'python', code: 'from typesafe_sdk import Choice, Noul, TypeSafeClient\n\nclient = TypeSafeClient(api_key="local", base_url="http://127.0.0.1:8009", model="kev-latest")\nresponse = client.system_one(state=ticket, questions={...})   # your existing questions\nprint(response.choices["team"].choice, response.nouls["urgent"].noul)' }]) +
+        '<h3>No GPU? Kev on a CPU with Docker</h3><p><code>aleskxyz/kev-onnx</code> is a community CPU server for Kev-4B (4-bit ONNX, about 2.5 GB download, about 4 GB of memory). Expect about 1 to 1.6 s per request on a laptop CPU.</p>' +
+        sh('terminal', 'curl -fsSL https://raw.githubusercontent.com/aleskxyz/kev-onnx/main/docker-compose.yml -o docker-compose.yml\ndocker compose pull\ndocker compose up -d\ncurl -s localhost:8008/health') +
+        '<h3>Good to know</h3><ul><li><b>Accuracy:</b> Kev-4B\'s own card says it "trails Jev by 16 points" on its broad benchmark (0.690 vs 0.757). The 9B gets closer.</li>' +
+        '<li><b>Speed:</b> about 18 ms on an H100 and 42 ms on an L40S for six questions (the card\'s figures).</li>' +
+        '<li>Settings: <code>KEV_TEMPERATURE</code>, <code>KEV_TRUNCATE_STATES</code>, <code>KEV_DTYPE</code>, <code>KEV_API_KEY</code>. GGUF builds made by others exist on Hugging Face (e.g. <code>ggml-org/Kev-0.8B-GGUF</code>).</li></ul>' +
+        '<div class="os-links">' + ext('https://github.com/jaredpalmer/kev', 'GitHub: jaredpalmer/kev') + ext('https://huggingface.co/jaredpalmer/kev-4b', 'Model card: kev-4b') + ext('https://github.com/aleskxyz/kev-onnx', 'CPU server: kev-onnx') + '</div>';
+    },
+    jevos: function () {
+      return '<h3>1. Download</h3><p>From the project\'s GitHub releases, download the program for your system (<code>jev-windows-x64.zip</code> or <code>jev-linux-x64.tar.gz</code>) and the model, <code>jevos-v5-openvino-int8.zip</code>.</p>' +
+        '<h3>2. Unpack and start it</h3>' +
+        sh('terminal (from its README)', 'tar -xzf jev-linux-x64.tar.gz                 # Windows: unzip jev-windows-x64.zip\ncd jev\nunzip ../jevos-v5-openvino-int8.zip           # creates model/\n./jev serve                                   # Windows: jev.exe serve\n\n# or fetch the model from Hugging Face instead of the zip:\nhf download feder-cr/jev --include "model/*" --local-dir jev') +
+        '<p>It listens on <code>127.0.0.1:8017</code>. Set <code>JEV_API_KEY</code> to require a key. No server needed for one-off checks: <code>./jev decide request.json</code>.</p>' +
+        '<h3>3. Call it</h3>' +
+        code({ lang: 'bash', label: 'call it', code: 'curl -s localhost:8017/v1/systemone -H "Content-Type: application/json" -d \'{\n  "model": "jev-latest",\n  "state": "My invoice shows a charge I do not recognize.",\n  "questions": {"billing": {"type": "noul", "instructions": "Is this a billing problem?"}}\n}\'\n\n# reply:\n# {"model": "jevos-v5", "answers": {"billing": {"type": "noul", "noul": 0.97}}, "usage": {"input_tokens": 28, "output_tokens": 0}}' }) +
+        '<h3>Good to know</h3><ul><li>About 1 GB of memory and 8,192 tokens of state; 28 to 130 ms per request on a recent laptop CPU (the author\'s figures).</li>' +
+        '<li>Code written for Jev\'s SDK "works unchanged for yes/no questions", says the README. Choices work; scores are marked "early".</li>' +
+        '<li>On the author\'s seven test sets it scores below Jev on every one (for example 0.92 vs 1.00 and 0.36 vs 0.59), and those sets were used to pick the release. Test it on your own data.</li></ul>' +
+        '<div class="os-links">' + ext('https://github.com/feder-cr/jev', 'GitHub: feder-cr/jev') + ext('https://huggingface.co/feder-cr/jev', 'Hugging Face: feder-cr/jev') + '</div>';
+    },
+    d1: function () {
+      return '<h3>Install and use (Python)</h3>' +
+        sh('terminal', 'pip install "transformers>=5.15" torch torchvision pillow soundfile') +
+        code({ lang: 'python', label: 'd1_omni.py', code: 'import torch\nfrom transformers import AutoModel\n\ndevice = "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"\nmodel = AutoModel.from_pretrained("LiquidAI/d1-omni-600M", trust_remote_code=True,\n                                  dtype=torch.float32).to(device)\n\nquestions = {\n    "refund": {"type": "noul", "instructions": "Is the customer asking for a refund?"},\n    "team": {"type": "choice", "instructions": "Which team should handle this?",\n             "criteria": {"billing": "charges and refunds", "tech": "bugs and logins", "other": None}},\n}\nprint(model.system_one("I was charged twice this month, please refund one of them.", questions))\n# {"answers": {...}, "usage": {"input_tokens": n, "output_tokens": 0}}' }) +
+        '<ul><li><code>trust_remote_code=True</code> runs Python code that ships with the model. Read it, or pin a revision you have checked.</li>' +
+        '<li>Same question schema (type, instructions, criteria), 16,384 tokens of state, and it can also look at images and listen to audio.</li>' +
+        '<li>Liquid AI calls it "an early research release" and publishes no speed figures. The <b>LFM Open License</b> is not Apache or MIT: read it before using it in a product.</li>' +
+        '<li>Liquid\'s hosted d1 on OpenRouter is a different, closed service.</li></ul>' +
+        '<div class="os-links">' + ext('https://huggingface.co/LiquidAI/d1-omni-600M', 'Model card: LiquidAI/d1-omni-600M') + '</div>';
+    },
+    semif: function () {
+      return '<h3>Install</h3>' +
+        sh('terminal', 'git clone https://github.com/TheoLeeCJ/SemIf-OpenJev.git && cd SemIf-OpenJev\npython -m venv .venv && . .venv/bin/activate\npip install -e \'.[test]\'              # NVIDIA GPU (needs room for a 4B model)\n# pip install -e \'.[test,llamacpp]\'    # CPU, with a GGUF file\n# pip install -e \'.[test,mlx]\'         # Apple Silicon') +
+        '<h3>Score a file</h3><p>One decision per line: <code>{"id", "state", "question", "options": [{"id", "description"}]}</code>. Results come back with the score of every option, timing, the exact model revision and a prompt hash.</p>' +
+        sh('terminal', 'semif-score --mode direct --model Qwen/Qwen3.5-4B --input examples/decisions.jsonl --output results.jsonl\n\n# CPU: add  --backend llamacpp --gguf /path/to/model.gguf') +
+        '<ul><li>Reads the model\'s own probabilities for each option instead of asking it to write JSON: about 1 s instead of 5 s for 21 decisions on an RTX 3090 (author\'s figures).</li>' +
+        '<li>No HTTP server and not wire-compatible with Jev\'s request; it\'s for batch jobs, audits and research.</li></ul>' +
+        '<div class="os-links">' + ext('https://github.com/TheoLeeCJ/SemIf-OpenJev', 'GitHub: TheoLeeCJ/SemIf-OpenJev') + '</div>';
+    },
+    von: function () {
+      return co('Von\'s GitHub repository was archived on 19 October 2026: "Von is no longer maintained and these weights will not be updated." Its author recommends Liquid AI\'s d1-omni-600M for new projects.', 'warn', 'alert') +
+        '<p>If you already run it, it keeps working: <code>pip install von-sdk</code>, <code>docker run --rm -p 8000:8000 -v von-hf:/data/huggingface ghcr.io/wfzyx/von:cpu</code>, and it serves the same <code>/v1/systemone</code> API (set <code>VON_API_KEY</code>). Plan a move to Laya, Kev or Ollaya.</p>' +
+        '<div class="os-links">' + ext('https://github.com/wfzyx/von', 'GitHub: wfzyx/von (archived)') + '</div>';
+    }
+  };
+
+  UI.page('opensource', { title: 'Open-source alternatives to Jev', nav: 'Open source', icon: 'unlock', order: 45 }, function (view, ctx) {
+    var hw = 'all';
+    var cards = function () {
+      return OPTS.map(function (o) {
+        return '<button type="button" class="ui-card os-card' + (hw !== 'all' && o.hw.indexOf(hw) < 0 ? ' dim' : '') + '" data-jump="' + o.id + '"><div class="top"><h3>' + esc(o.name) + '</h3>' +
+          (o.best ? badge(o.best, 'brand') : badge(o.status[0], o.status[1])) + '</div><p>' + esc(o.pitch) + '</p><div class="tags">' + badge(o.lic, 'mono') + badge(o.server) + '</div></button>';
+      }).join('');
+    };
+    var TIPS = {
+      all: 'Not sure? <b>Laya</b> if you write Python, <b>Ollaya</b> if you\'d rather install an app, <b>Kev</b> if you have a GPU and want the closest match to Jev.',
+      cpu: 'On a normal computer: <b>Laya</b> (pip) or <b>jevos</b> (one program, no Python). Ollaya runs Laya on CPU too.',
+      mac: 'On a Mac: <b>Ollaya</b> or <b>Kev</b> (it uses Apple\'s MLX; 0.8B on any Apple Silicon Mac, 4B with 32 GB).',
+      gpu: 'With an NVIDIA GPU: <b>Kev-4B</b> for accuracy, <b>Laya</b> for speed (about 33 ms a request).',
+      node: 'In a Node.js app: <b>@receptron/laya</b> runs Laya in-process, no server and no Python.',
+      app: 'Little code: <b>Ollaya</b>\'s desktop app, then any tool that talks to TypeSafe\'s API.'
+    };
+
+    view.innerHTML = '<div class="ui-wrap"><div class="os-art" style="max-width:none">' +
+      '<div class="os-head"><div><div class="eyebrow">Open source · checked ' + CHECKED + '</div><h1>Jev-style decisions, on your own machine</h1>' +
+      '<p class="lead">Jev is closed: it only runs on TypeSafe\'s servers, so every message you ask about goes to TypeSafe (directly, or through OpenRouter or NanoGPT). These open-source models answer the same kinds of questions (choice, yes/no, score, with probabilities) where your data already lives.</p></div>' +
+      '<div class="ui-card os-facts"><div>' + UI.icon('unlock') + '<span><b>Free and open</b>: Apache-2.0 or MIT for most of them.</span></div><div>' + UI.icon('server') + '<span><b>Same request</b>: several serve TypeSafe\'s <code>/v1/systemone</code>. Change one URL.</span></div>' +
+      '<div>' + UI.icon('alert') + '<span><b>Honest</b>: out of the box most are less accurate than Jev. Test on your own data.</span></div></div></div>' +
+      '<div class="os-why"><div class="ui-card"><span class="ic">' + UI.icon('lock') + '</span><h3>Your data stays with you</h3><p>Customer emails, contracts and tickets never leave your servers. No third-party processor to list in your privacy policy.</p></div>' +
+      '<div class="ui-card"><span class="ic">' + UI.icon('wallet') + '</span><h3>No per-call bill</h3><p>You pay for the computer, not per token. Small models run on a laptop CPU; bigger ones want a GPU.</p></div>' +
+      '<div class="ui-card"><span class="ic">' + UI.icon('route') + '</span><h3>No lock-in</h3><p>Open weights don\'t disappear or change under you. Pin a version and it answers the same way next year.</p></div></div>' +
+
+      '<nav class="os-jump" aria-label="On this page">' + [['switch', 'The switch'], ['pick', 'Pick one'], ['compare', 'Compare']].concat(OPTS.map(function (o) { return [o.id, o.name]; }))
+        .concat([['diy', 'Build your own'], ['expose', 'Put it online'], ['measure', 'Test first'], ['here', 'In Jev Buddy'], ['sources', 'Sources']])
+        .map(function (j) { return '<button type="button" data-jump="' + j[0] + '">' + esc(j[1]) + '</button>'; }).join('') + '</nav>' +
+
+      '<section class="os-sec" id="os-switch"><h2>The one-line switch</h2><p class="sub">Laya, Kev, jevos, Ollaya and Von all answer <code>POST /v1/systemone</code> with the request from TypeSafe\'s API: <code>state</code> plus named <code>questions</code> of type choice, noul or score. Your questions stay the same; the address changes.</p>' +
+      code([{ label: 'Python', key: 'python', lang: 'python', code: SWITCH_PY }, { label: 'TypeScript', key: 'ts', lang: 'ts', code: SWITCH_TS }, { label: 'curl', key: 'curl', lang: 'bash', code: SWITCH_CURL }, { label: 'TypeSafe SDK', key: 'sdk', lang: 'python', code: SWITCH_SDK }]) +
+      JB.table(['Server', 'Default address', 'Key setting'], [['Laya (<code>laya-serve</code>)', '<code>0.0.0.0:8000</code> (all addresses!)', '<code>LAYA_API_KEY</code>'], ['Kev (<code>kev.serve</code>)', '<code>127.0.0.1</code>, port you choose', '<code>KEV_API_KEY</code>'],
+        ['jevos (<code>jev serve</code>)', '<code>127.0.0.1:8017</code>', '<code>JEV_API_KEY</code>'], ['Ollaya', 'port <code>11435</code>', '<code>OLLAYA_API_KEY</code>'], ['kev-onnx (Docker)', 'port <code>8008</code>', 'none listed']]) +
+      co('OpenRouter\'s endpoint is different (<code>/api/alpha/decisions</code> with <code>model: "typesafe/jev-1.13"</code>). The body is the same idea, so code written for OpenRouter needs the new URL and, usually, no <code>model</code> field. Answers can carry extra fields (Laya adds things like <code>prediction_set</code> and <code>route</code>): read what you need and check that <code>confidence</code> is there before you use it.', '', 'info') + '</section>' +
+
+      '<section class="os-sec" id="os-pick"><h2>Pick one</h2><p class="sub">What will it run on?</p><div class="os-chips" role="group" aria-label="Your hardware">' +
+      HW.map(function (h) { return '<button type="button" data-hw="' + h[0] + '" class="' + (h[0] === hw ? 'on' : '') + '">' + UI.icon(h[2]) + esc(h[1]) + '</button>'; }).join('') + '</div>' +
+      '<p class="os-tip" data-tip>' + TIPS[hw] + '</p><div class="os-grid" data-cards>' + cards() + '</div></section>' +
+
+      '<section class="os-sec" id="os-compare"><h2>At a glance</h2><p class="sub">From each project\'s own page on ' + CHECKED + '. Accuracy figures are the authors\' own, on different test sets, so treat them as hints, not a ranking.</p>' +
+      JB.table(['', 'Licence', 'Size', 'Runs on', 'Jev-style server', 'Accuracy vs Jev (author\'s figures)'], [
+        ['<b>Laya</b>', 'Apache-2.0', '421M / 322M', 'CPU, GPU, Node.js', 'Yes, :8000', 'Base 0.362 (random 0.318) on typed decisions; tuned 0.766 vs 0.727. 77 options: 0.425 vs 0.870'],
+        ['<b>Kev-4B</b>', 'Apache-2.0', '4B', 'GPU, 32 GB Mac (CPU via kev-onnx)', 'Yes, any port', 'Broad set 0.690 vs 0.757'],
+        ['<b>jevos</b>', 'MIT', '~1 GB', 'CPU only', 'Yes, :8017', 'Below Jev on all 7 author sets'],
+        ['<b>Ollaya</b>', 'Apache-2.0 (+ each model\'s)', 'Many', 'CPU, Mac, GPU, Docker, app', 'Yes, :11435', 'Depends on the model you pull'],
+        ['<b>d1-omni-600M</b>', 'LFM Open License', '587M', 'CPU, Mac, GPU', 'No (Python)', 'No Jev comparison published'],
+        ['<b>SemIf</b>', 'MIT (code)', 'Qwen 0.6B to 4B', 'GPU, CPU (llama.cpp), Mac', 'No (batch CLI)', '0.813 vs 0.883 on a 102-row subset'],
+        ['<b>Von</b>', 'Apache-2.0', '395M', 'CPU, GPU', 'Yes, :8000', 'Archived; 72.0% vs 96.6%']]) +
+      '<p class="small muted">Jev\'s own figures in those tables were published by TypeSafe or third parties, not re-measured by the projects. Speed is where open models shine: Laya about 33 ms on a T4 GPU, jevos 28 to 130 ms on a laptop CPU, against about 0.21 s for Jev through OpenRouter.</p></section>' +
+
+      OPTS.map(function (o) { return optHead(o) + BODY[o.id]() + '</section>'; }).join('') +
+
+      '<section class="os-sec os-opt" id="os-diy"><h2>Build your own from any open LLM</h2><p class="sub">You don\'t need a special model: any open-weights LLM can answer a choice by reading the probability it gives each option, in one pass and without writing text. These projects do exactly that (not tested by us):</p><ul>' +
+      '<li><b>AnyJev</b> (Nokia Applied Research) reads choice, noul and score from an open LLM without fine-tuning; a small head trained on 100 to 300 of your labels can run behind vLLM. ' + ext('https://github.com/nokia-applied-research/AnyJev', 'AnyJev') + '</li>' +
+      '<li><b>open-alternative-jev</b>: the same idea with Hugging Face or vLLM. ' + ext('https://github.com/ikermoel/open-alternative-jev', 'open-alternative-jev') + '</li>' +
+      '<li><b>openjev-sglang</b> serves <code>/v1/systemone</code> from Qwen3.6-35B-A3B on SGLang (a big GPU). It has no licence file, so you can read it but not legally reuse the code without asking. ' + ext('https://github.com/ekzhang/openjev-sglang', 'openjev-sglang') + '</li>' +
+      '<li><b>OpenDecision</b> (Apache-2.0) answers choice, noul and score with a ~400M zero-shot classifier (ModernBERT-large-zeroshot). Its confidence measures how concentrated the answer is, not the chance it is right. ' + ext('https://github.com/deepanwadhwa/OpenDecision', 'OpenDecision') + '</li>' +
+      '<li><b>Plain classifiers</b> such as SetFit (train on a few dozen examples) or GLiNER (pull out names and amounts) are often all you need for one fixed task. ' + ext('https://github.com/huggingface/setfit', 'SetFit') + ' ' + ext('https://github.com/urchade/GLiNER', 'GLiNER') + '</li></ul>' +
+      co('Structured-output libraries (Outlines, Instructor, DSPy) guarantee a valid label from a local LLM, but give you no probability to set a threshold on. Use them for extraction, and one of the options above for decisions.', '', 'bulb') +
+      '<p>Some companies publish open weights for decision models they also host (Cloudflare\'s Clef and Perplexity\'s pplx-decider are listed as Apache-2.0). Their hosted versions still see your data; the weights can run on your own machine, for example through Ollaya.</p></section>' +
+
+      '<section class="os-sec os-opt" id="os-expose"><h2>Putting your server online safely</h2><p class="sub">On your own computer, keep the server on <code>127.0.0.1</code>. When another service needs it (your web app, or Jev Buddy\'s playground), put it behind HTTPS with a key.</p>' +
+      '<ul class="os-check">' + [
+        '<b>Always set the key</b> (<code>LAYA_API_KEY</code>, <code>KEV_API_KEY</code>, <code>JEV_API_KEY</code>, <code>OLLAYA_API_KEY</code>). Every one of these servers is open to anyone who can reach it until you do.',
+        '<b>Bind to 127.0.0.1</b> and let a reverse proxy face the internet. With Docker, publish ports as <code>-p 127.0.0.1:8000:8000</code>.',
+        '<b>HTTPS only.</b> The key travels in a header; plain HTTP would expose it.',
+        '<b>Go offline after the first download</b> (<code>HF_HUB_OFFLINE=1</code>) and pin the model revision, so nothing changes without you.',
+        '<b>Check the licence</b> of the weights, not just the code (LFM, CC BY-NC and "no licence" all limit what you can do).',
+        '<b>Log decisions, not text,</b> just as you would with Jev.'
+      ].map(function (t) { return '<li>' + UI.icon('check') + '<span>' + t + '</span></li>'; }).join('') + '</ul>' +
+      '<div class="os-two">' + code({ lang: 'bash', label: 'Caddyfile: HTTPS in front of the server', code: '# Caddy gets a certificate for you automatically\ndecide.example.com {\n    reverse_proxy 127.0.0.1:8000\n}' }) +
+      code({ lang: 'bash', label: 'or a quick tunnel (for testing)', code: '# Cloudflare quick tunnel: prints a temporary https:// address\ncloudflared tunnel --url http://127.0.0.1:8000\n\n# A tunnel company carries your traffic, so for\n# private data prefer your own server + Caddy.' }) + '</div></section>' +
+
+      '<section class="os-sec os-opt" id="os-measure"><h2>Test before you switch</h2><p class="sub">The fair test is your own data. Label 200 to 300 real examples, run them through both, and compare how many each gets right at the confidence you plan to act on.</p>' +
+      code({ lang: 'python', label: 'compare.py', code: 'import csv\nimport requests\n\nSERVERS = {\n    "laya": "http://127.0.0.1:8000/v1/systemone",\n    "kev": "http://127.0.0.1:8009/v1/systemone",\n}\nQUESTION = {"team": {"type": "choice", "instructions": "Which team should handle this?",\n                     "criteria": {"billing": "Charges, refunds", "tech": "Bugs, logins", "shipping": "Deliveries"}}}\n\nrows = list(csv.DictReader(open("labelled_tickets.csv")))   # columns: text, team\nfor name, url in SERVERS.items():\n    right = auto = 0\n    for r in rows:\n        a = requests.post(url, json={"state": r["text"], "questions": QUESTION}, timeout=30).json()["answers"]["team"]\n        conf = a.get("confidence", max(a["probabilities"].values()))\n        if conf >= 0.7:\n            auto += 1\n            right += a["choice"] == r["team"]\n    print(f"{name}: automates {auto / len(rows):.0%}, right on {right / max(auto, 1):.1%} of those")' }) +
+      '<p>Then set thresholds per model with the ' + '<a href="#tools/thresholds" data-go="tools/thresholds">threshold simulator</a>. Thresholds tuned on Jev don\'t carry over to another model.</p></section>' +
+
+      '<section class="os-sec os-opt" id="os-here"><h2>Using it with Jev Buddy</h2><ul>' +
+      '<li><b>Every code sample</b> in the playground, use cases and recipes now has a <b>Self-hosted</b> tab: the same request, sent to <code>http://127.0.0.1:8000/v1/systemone</code> (change <code>DECISIONS_URL</code> for other ports).</li>' +
+      '<li><b>The playground\'s simulator</b> runs in your browser and sends nothing anywhere.</li>' +
+      '<li><b>Site admins</b> can send live playground runs to their own open-source server instead of OpenRouter: Admin → Jev API → "Your own open-source server", then paste its HTTPS address and key.</li></ul>' +
+      '<div class="ui-row"><a class="ui-btn primary" href="#playground" data-go="playground">' + UI.icon('play') + 'Open the playground</a><a class="ui-btn" href="#learn/self-host" data-go="learn/self-host">' + UI.icon('book') + 'The guide chapter</a></div></section>' +
+
+      '<section class="os-sec os-opt" id="os-sources"><h2>Sources</h2><p class="sub">Read on ' + CHECKED + '. Jev Buddy isn\'t affiliated with any of these projects; check their pages before you rely on a number.</p><div class="os-src">' + [
+        ['https://huggingface.co/convaiinnovations/laya', 'Laya model card', 'Sizes, checkpoints, laya-serve, limits and benchmarks.'],
+        ['https://pypi.org/project/laya/', 'Laya on PyPI', 'Install options, extras, Windows steps, CLI.'],
+        ['https://nandhakishorm.github.io/laya/docker/', 'Laya Docker docs', 'Compose files, environment variables, offline mode.'],
+        ['https://github.com/receptron/laya', 'receptron/laya', 'Laya in Node.js with ONNX Runtime.'],
+        ['https://github.com/ollaya-dev/ollaya', 'Ollaya', 'Install, commands, model list, port and settings.'],
+        ['https://github.com/jaredpalmer/kev', 'Kev', 'Checkpoints, hardware, serve command, settings.'],
+        ['https://huggingface.co/jaredpalmer/kev-4b', 'Kev-4B model card', 'Benchmarks vs Jev and the SDK example.'],
+        ['https://github.com/aleskxyz/kev-onnx', 'kev-onnx', 'Kev on a CPU with Docker.'],
+        ['https://github.com/feder-cr/jev', 'jevos', 'Downloads, serve command, accuracy and speed charts.'],
+        ['https://huggingface.co/LiquidAI/d1-omni-600M', 'd1-omni-600M', 'Liquid AI\'s small open decision model.'],
+        ['https://github.com/TheoLeeCJ/SemIf-OpenJev', 'SemIf', 'Logit-based batch scoring with small open LLMs.'],
+        ['https://github.com/wfzyx/von', 'Von (archived)', 'The archive notice and its last API.'],
+        ['https://systemonemodels.org/examples/alternatives/', 'systemonemodels.org: alternatives', 'A community list of open and hosted decision models.'],
+        ['https://github.com/topics/jev-alternative', 'GitHub topic: jev-alternative', 'More projects, updated daily.']
+      ].map(function (s) { return '<a href="' + s[0] + '" target="_blank" rel="noopener"><b>' + esc(s[1]) + '</b> ' + UI.icon('external') + '<span>' + esc(s[2]) + '</span><code>' + esc(s[0].replace('https://', '')) + '</code></a>'; }).join('') + '</div></section>' +
+      '</div></div>';
+
+    function jump(id, smooth) {
+      var el = view.querySelector('#os-' + id);
+      if (el) el.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto', block: 'start' });
+    }
+    view.addEventListener('click', function (e) {
+      var h = e.target.closest('[data-hw]');
+      if (h) {
+        hw = h.getAttribute('data-hw');
+        view.querySelectorAll('[data-hw]').forEach(function (b) { b.classList.toggle('on', b === h); });
+        view.querySelector('[data-cards]').innerHTML = cards();
+        view.querySelector('[data-tip]').innerHTML = TIPS[hw];
+        return;
+      }
+      var j = e.target.closest('[data-jump]');
+      if (j) jump(j.getAttribute('data-jump'), true);
+    });
+    if (ctx.args[0]) setTimeout(function () { jump(ctx.args[0], false); }, 30);
+    return Promise.resolve();
   });
 })();
 
@@ -1979,8 +2328,10 @@
     }
 
     function modeHtml() {
-      if (status.live && ctx.me) return '<span class="jb-live-flag">Live</span> Real Jev calls via OpenRouter (' + esc(status.model) + ')' + (status.daily_left != null ? ', ' + status.daily_left + ' shared runs left today' : '') + '.';
-      if (status.live) return '<span class="jb-sim-flag">Simulator</span> Live runs are on: <a href="#auth" data-go="auth">sign in</a> to run on real Jev.';
+      var self = status.provider === 'selfhosted';
+      if (status.live && ctx.me) return '<span class="jb-live-flag">Live</span> ' + (self ? 'Real answers from this site\'s own <a href="#opensource" data-go="opensource">open-source decision model</a> (' + esc(status.model) + '): your text doesn\'t go to TypeSafe or OpenRouter'
+        : 'Real Jev calls via OpenRouter (' + esc(status.model) + ')') + (status.daily_left != null ? ', ' + status.daily_left + ' shared runs left today' : '') + '.';
+      if (status.live) return '<span class="jb-sim-flag">Simulator</span> Live runs are on: <a href="#auth" data-go="auth">sign in</a> to run on ' + (self ? 'our open-source model server' : 'real Jev') + '.';
       return '<span class="jb-sim-flag">Simulator</span> Shows Jev\'s exact response shape using keyword overlap, not the real model. For real answers, copy the code with your own key.';
     }
 
@@ -1991,7 +2342,7 @@
       }).join('');
       var errs = probs.length ? '<div class="ui-error pg-err">' + probs.slice(0, 4).map(esc).join('<br>') + (probs.length > 4 ? '<br>…and ' + (probs.length - 4) + ' more' : '') + '</div>' : '';
       if (tab === 'request') { box.innerHTML = errs + JB.code({ lang: 'json', label: 'POST ' + JB.ENDPOINT.replace('https://', ''), code: JB.reqJson(req) }); return; }
-      if (tab === 'code') { box.innerHTML = errs + JB.code(JB.genBlocks(req)) + '<p class="small muted">Set <code>OPENROUTER_API_KEY</code> (or <code>TYPESAFE_API_KEY</code> for the SDK tab) and run it.</p>'; return; }
+      if (tab === 'code') { box.innerHTML = errs + JB.code(JB.genBlocks(req)) + '<p class="small muted">Set <code>OPENROUTER_API_KEY</code> (or <code>TYPESAFE_API_KEY</code> for the SDK tab) and run it. The <b>Self-hosted</b> tab sends the same request to an open-source model on your own machine instead: <a href="#opensource" data-go="opensource">set one up</a>.</p>'; return; }
       if (lastErr) { box.innerHTML = errs + '<div class="ui-error pg-err">' + esc(lastErr) + '</div>'; return; }
       if (!last) {
         box.innerHTML = errs + '<div class="pg-empty">' + UI.icon('play') + '<h3 style="margin:8px 0 4px">Press Run</h3><p class="small" style="margin:0">Answers show up here as cards. <span class="pg-kbd">Ctrl + Enter works too.</span></p></div>';
