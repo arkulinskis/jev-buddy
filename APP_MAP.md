@@ -7,7 +7,7 @@ around them with an offset instead of whole files.
 
 **What it is:** The friendly developer guide to Jev, the AI decision model: choice, noul and score explained with code, business examples, a playground and a cost calculator.
 **Live:** https://jev-buddy.anvil.app · **Repo:** github.com/arkulinskis/jev-buddy · **Layout:** native Anvil Forms · **Deploy:** master
-**Guide** (workflow, design rules, product knowledge): `jev-buddy/.claude/skills/jevbuddy/SKILL.md`
+**Guide** (workflow, design rules, product knowledge): `.claude/skills/jevbuddy/SKILL.md`
 
 ## How to change it
 
