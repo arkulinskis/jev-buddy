@@ -1,0 +1,48 @@
+<anvil-form layout="Jev_Buddy.Layouts.Shell">
+  <anvil-block slot="content">
+    <div class="ui-wrap">
+      <div anvil:name="index_part">
+        <div class="lr-idx-head">
+          <div>
+            <h1 class="lr-idx-title">Everything a developer needs to ship Jev</h1>
+            <p class="muted lr-idx-lead">The Jev guide in sixteen short chapters, from your first call to production patterns and self-hosting. Every code sample comes in Python, TypeScript and curl, and the tabs remember your language.</p>
+          </div>
+          <div class="ui-card">
+            <div class="lr-prog">
+              <div class="ui-row between small"><b>Your progress</b><anvil-component type="Label" name="prog_count" prop:role='["fine-print"]'></anvil-component></div>
+              <div class="bar" role="progressbar" aria-label="Chapters read" anvil:name="prog_bar_box"><b anvil:dom-node="prog_bar"></b></div>
+            </div>
+            <a class="ui-btn primary block" href="#learn/what-is-jev" anvil:name="continue_link"><i class="ic ic-play"></i><anvil-component type="Label" name="continue_label" prop:role='["t"]'></anvil-component></a>
+          </div>
+        </div>
+        <anvil-component type="RepeatingPanel" name="groups" prop:item_template="Jev_Buddy.Items.ChapterGroup"></anvil-component>
+      </div>
+
+      <div anvil:name="chapter_part">
+        <div class="lr-wrap">
+          <aside class="lr-side" aria-label="Chapters">
+            <div class="lr-prog">
+              <div class="ui-row between small"><b>Your progress</b><anvil-component type="Label" name="side_count" prop:role='["fine-print"]'></anvil-component></div>
+              <div class="bar" role="progressbar" aria-label="Chapters read" anvil:name="side_bar_box"><b anvil:dom-node="side_bar"></b></div>
+            </div>
+            <anvil-component type="RepeatingPanel" name="side_groups" prop:item_template="Jev_Buddy.Items.SideGroup"></anvil-component>
+          </aside>
+          <article class="lr-art">
+            <label class="lr-pick ui-field"><anvil-component type="Label" name="pick_label" prop:role='["fine-print"]'></anvil-component>
+              <anvil-component type="DropDown" name="pick" prop:role='["lr-pick-box"]'></anvil-component></label>
+            <div class="lr-meta">
+              <anvil-component type="Label" name="group_badge" prop:role='["badge", "badge-brand", "badge-mono"]'></anvil-component>
+              <span class="ui-badge mono"><i class="ic ic-clock"></i><anvil-component type="Label" name="mins" prop:role='["t"]'></anvil-component></span>
+            </div>
+            <anvil-component type="Label" name="title" prop:role='["lr-title"]'></anvil-component>
+            <anvil-component type="Jev_Buddy.Components.Rich" name="body"></anvil-component>
+            <div class="lr-nav" anvil:dom-node="end">
+              <a href="#learn" anvil:name="prev_link"><small>← Previous</small><anvil-component type="Label" name="prev_title" prop:role='["strong"]'></anvil-component></a>
+              <a href="#playground" class="next" anvil:name="next_link"><small anvil:dom-node="next_small">Next →</small><anvil-component type="Label" name="next_title" prop:role='["strong"]'></anvil-component></a>
+            </div>
+          </article>
+        </div>
+      </div>
+    </div>
+  </anvil-block>
+</anvil-form>

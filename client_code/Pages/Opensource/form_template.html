@@ -1,0 +1,57 @@
+<anvil-form layout="Jev_Buddy.Layouts.Shell">
+  <anvil-block slot="content">
+    <div class="ui-wrap">
+      <div class="os-art os-full">
+        <div class="os-head">
+          <div>
+            <h1>Jev-style decisions, on your own machine</h1>
+            <p class="lead">Jev is closed: it only runs on TypeSafe's servers, so every message you ask about goes to TypeSafe (directly, or through OpenRouter or NanoGPT). These open-source models answer the same kinds of questions (choice, yes/no, score, with probabilities) where your data already lives.</p>
+            <p class="small muted os-checked">Every fact on this page was checked on 5 November 2026.</p>
+          </div>
+          <div class="ui-card os-facts">
+            <div><i class="ic ic-unlock"></i><span><b>Free and open</b>: Apache-2.0 or MIT for most of them.</span></div>
+            <div><i class="ic ic-server"></i><span><b>Same request</b>: several serve TypeSafe's <code>/v1/systemone</code>. Change one URL.</span></div>
+            <div><i class="ic ic-alert"></i><span><b>Honest</b>: out of the box most are less accurate than Jev. Test on your own data.</span></div>
+          </div>
+        </div>
+        <div class="os-why">
+          <div class="ui-card"><span class="tile"><i class="ic ic-lock"></i></span><h3>Your data stays with you</h3><p>Customer emails, contracts and tickets never leave your servers. No third-party processor to list in your privacy policy.</p></div>
+          <div class="ui-card"><span class="tile"><i class="ic ic-wallet"></i></span><h3>No per-call bill</h3><p>You pay for the computer, not per token. Small models run on a laptop CPU; bigger ones want a GPU.</p></div>
+          <div class="ui-card"><span class="tile"><i class="ic ic-route"></i></span><h3>No lock-in</h3><p>Open weights don't disappear or change under you. Pin a version and it answers the same way next year.</p></div>
+        </div>
+
+        <nav class="os-jump" aria-label="On this page" anvil:dom-node="jump_nav" tabindex="0">
+          <button type="button" data-jump="switch">The switch</button>
+          <button type="button" data-jump="pick">Pick one</button>
+          <button type="button" data-jump="compare">Compare</button>
+          <button type="button" data-jump="laya">Laya</button>
+          <button type="button" data-jump="ollaya">Ollaya</button>
+          <button type="button" data-jump="kev">Kev</button>
+          <button type="button" data-jump="jevos">jevos</button>
+          <button type="button" data-jump="d1">d1-omni-600M</button>
+          <button type="button" data-jump="semif">SemIf</button>
+          <button type="button" data-jump="von">Von</button>
+          <button type="button" data-jump="diy">Build your own</button>
+          <button type="button" data-jump="expose">Put it online</button>
+          <button type="button" data-jump="measure">Test first</button>
+          <button type="button" data-jump="here">In Jev Buddy</button>
+          <button type="button" data-jump="sources">Sources</button>
+        </nav>
+
+        <anvil-component type="Jev_Buddy.Components.Rich" name="switch_part"></anvil-component>
+
+        <section class="os-sec" id="os-pick">
+          <h2>Pick one</h2>
+          <p class="sub">What will it run on?</p>
+          <div class="os-chips" role="group" aria-label="Your hardware">
+            <anvil-component type="RepeatingPanel" name="chips" prop:item_template="Jev_Buddy.Items.CatChip" prop:role='["contents"]'></anvil-component>
+          </div>
+          <anvil-component type="Jev_Buddy.Components.Rich" name="tip"></anvil-component>
+          <anvil-component type="RepeatingPanel" name="cards" prop:item_template="Jev_Buddy.Items.OsCard" prop:role='["os-grid"]'></anvil-component>
+        </section>
+
+        <anvil-component type="Jev_Buddy.Components.Rich" name="rest_part"></anvil-component>
+      </div>
+    </div>
+  </anvil-block>
+</anvil-form>

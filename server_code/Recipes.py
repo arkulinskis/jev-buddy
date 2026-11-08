@@ -90,7 +90,7 @@ def save_recipe(data, recipe_id=None, forked_from=None):
     if not isinstance(state, str):
         import json
         state = json.dumps(state, indent=2)
-    fields = dict(title=title, summary=C.text(data.get("summary"), 240), category=category, state=state,
+    fields: dict = dict(title=title, summary=C.text(data.get("summary"), 240), category=category, state=state,
                   questions=questions, is_public=bool(data.get("is_public")), updated=C.now())
     if recipe_id:
         r = C.row_by_id(app_tables.recipes, recipe_id)

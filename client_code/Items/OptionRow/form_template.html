@@ -1,0 +1,6 @@
+<div class="pg-row">
+  <anvil-component type="Label" name="ix" prop:role='["pg-ix"]'></anvil-component>
+  <anvil-component type="TextBox" name="label_box" prop:placeholder="label" prop:role='["pg-in", "pg-mono"]' bind:text="self.item['label']"></anvil-component>
+  <anvil-component type="TextBox" name="desc_box" prop:placeholder="Description (optional for obvious labels)" prop:role='["pg-in", "pg-desc"]' bind:text="self.item['desc']"></anvil-component>
+  <anvil-component type="Button" name="del_button" prop:text="Remove option" prop:role='["btn", "btn-ghost", "btn-icon", "ic-x", "pg-del"]'></anvil-component>
+</div>

@@ -1,0 +1,65 @@
+<anvil-form layout="Jev_Buddy.Layouts.Shell">
+  <anvil-block slot="content">
+    <div class="ui-wrap">
+      <div anvil:name="list_part">
+        <div class="ex-head">
+          <div>
+            <h1 class="ex-title">Where Jev earns its keep</h1>
+            <p class="muted ex-lead">Twelve real-world business decision jobs, each with the exact request, what comes back, the code that acts on it, and what it costs at that company's volume.</p>
+          </div>
+          <a class="ui-btn" href="#recipes"><i class="ic ic-users"></i>Community recipes</a>
+        </div>
+        <div class="ex-chips" role="group" aria-label="Category">
+          <anvil-component type="RepeatingPanel" name="chips" prop:item_template="Jev_Buddy.Items.CatChip" prop:role='["contents"]'></anvil-component>
+        </div>
+        <anvil-component type="RepeatingPanel" name="cards" prop:item_template="Jev_Buddy.Items.ExampleCard" prop:role='["ex-grid"]'></anvil-component>
+        <p class="small faint ex-foot-note">Monthly cost = calls × estimated input tokens × $0.042 per million (OpenRouter, Oct 2026). Output tokens are free.</p>
+      </div>
+
+      <div anvil:name="detail_part">
+        <a class="ui-btn ghost sm" href="#examples"><i class="ic ic-back"></i>All use cases</a>
+        <div class="ex-d-head">
+          <div>
+            <span class="ui-badge brand"><i class="ic" anvil:name="cat_icon"></i><anvil-component type="Label" name="cat_label" prop:role='["t"]'></anvil-component></span>
+            <anvil-component type="Label" name="title" prop:role='["ex-d-title"]'></anvil-component>
+            <anvil-component type="Label" name="tagline" prop:role='["ex-d-lead"]'></anvil-component>
+            <anvil-component type="Label" name="who" prop:role='["fine-print", "mono"]'></anvil-component>
+          </div>
+          <div class="ui-card ex-cost">
+            <anvil-component type="Label" name="calls" prop:role='["ex-cost-small"]'></anvil-component>
+            <div class="big"><anvil-component type="Label" name="month" prop:role='["t"]'></anvil-component><span class="per"> /month</span></div>
+            <anvil-component type="Label" name="per_call" prop:role='["ex-cost-small"]'></anvil-component>
+            <div class="ex-cost-link"><a href="#tools/cost" anvil:name="compare_link">Compare with an LLM →</a></div>
+          </div>
+        </div>
+        <div class="ex-cols">
+          <div class="ui-card">
+            <h3><i class="ic ic-alert"></i>The problem</h3>
+            <anvil-component type="Label" name="problem" prop:role='["ex-p"]'></anvil-component>
+            <p class="muted small ex-before"><b>Today:</b> <anvil-component type="Label" name="before" prop:role='["t"]'></anvil-component></p>
+          </div>
+          <div class="ui-card">
+            <h3><i class="ic ic-route"></i>With Jev</h3>
+            <anvil-component type="RepeatingPanel" name="steps" prop:item_template="Jev_Buddy.Items.Step" prop:role='["ex-steps"]'></anvil-component>
+          </div>
+        </div>
+        <section class="ex-sec"><h2><span class="n">01</span>The state</h2><p class="muted">One real-looking input. In production this is each ticket, post, email or record.</p>
+          <anvil-component type="Label" name="state_text" prop:role='["ex-state"]'></anvil-component></section>
+        <section class="ex-sec"><h2><span class="n">02</span>The request</h2>
+          <anvil-component type="Jev_Buddy.Components.Rich" name="request_code"></anvil-component></section>
+        <section class="ex-sec"><h2><span class="n">03</span>What comes back</h2><p class="muted">Illustrative answers, in exactly the shape Jev returns.</p>
+          <anvil-component type="Jev_Buddy.Components.Rich" name="answers"></anvil-component>
+          <details class="jb-raw"><summary>Show the raw response</summary>
+            <anvil-component type="Jev_Buddy.Components.Rich" name="raw"></anvil-component></details></section>
+        <section class="ex-sec"><h2><span class="n">04</span>The decision logic</h2><p class="muted">Jev decides; your code acts. <code>ask()</code> is the helper from <a href="#learn/anatomy">Anatomy of a request</a>.</p>
+          <anvil-component type="Jev_Buddy.Components.Rich" name="logic"></anvil-component></section>
+        <section class="ex-sec"><h2><span class="n">05</span>Tips from the field</h2>
+          <anvil-component type="RepeatingPanel" name="tips" prop:item_template="Jev_Buddy.Items.Tip"></anvil-component></section>
+        <div class="ex-more">
+          <anvil-component type="Button" name="try_button" prop:text="Open in the playground" prop:role='["btn", "btn-primary", "btn-lg", "ic-play"]'></anvil-component>
+          <a class="ui-btn lg" href="#examples" anvil:name="next_link"><anvil-component type="Label" name="next_label" prop:role='["t"]'></anvil-component> <i class="ic ic-arrow"></i></a>
+        </div>
+      </div>
+    </div>
+  </anvil-block>
+</anvil-form>

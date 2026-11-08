@@ -1,0 +1,99 @@
+<anvil-form layout="Jev_Buddy.Layouts.Shell">
+  <anvil-block slot="content">
+    <div class="ui-wrap">
+      <div class="ui-page-head"><div><h1>Calculators for Jev</h1>
+        <p class="muted">Work out what Jev costs at your volume, how confidence is computed, and where to put your thresholds.</p></div></div>
+      <nav class="ui-tabs" aria-label="Tools">
+        <a href="#tools/cost" anvil:name="tab_cost"><i class="ic ic-calc"></i>Cost calculator</a>
+        <a href="#tools/confidence" anvil:name="tab_confidence"><i class="ic ic-target"></i>Confidence calculator</a>
+        <a href="#tools/thresholds" anvil:name="tab_thresholds"><i class="ic ic-gauge"></i>Threshold simulator</a>
+      </nav>
+
+      <div anvil:name="cost_part" class="tl-grid">
+        <div class="ui-card tl-form">
+          <fieldset><legend>Your workload</legend>
+            <label class="ui-field"><span>Decisions per month</span><anvil-component type="TextBox" name="c_volume" prop:type="number"></anvil-component></label>
+            <label class="ui-field"><span>Input tokens per call</span><anvil-component type="TextBox" name="c_tokens" prop:type="number"></anvil-component><span class="ui-hint">State plus questions. About 4 characters = 1 token.</span></label>
+            <label class="ui-field"><span>Questions per call</span><anvil-component type="TextBox" name="c_questions" prop:type="number"></anvil-component></label>
+          </fieldset>
+          <fieldset><legend>Compared with an LLM (edit me)</legend>
+            <label class="ui-field"><span>LLM input, $ per million tokens</span><anvil-component type="TextBox" name="c_llm_in" prop:type="number"></anvil-component></label>
+            <label class="ui-field"><span>LLM output, $ per million tokens</span><anvil-component type="TextBox" name="c_llm_out" prop:type="number"></anvil-component></label>
+            <label class="ui-field"><span>JSON output tokens per question</span><anvil-component type="TextBox" name="c_out_per_q" prop:type="number"></anvil-component></label>
+            <label class="ui-field"><span>Extra prompt tokens (format rules)</span><anvil-component type="TextBox" name="c_overhead" prop:type="number"></anvil-component></label>
+            <label class="ui-field"><span>Retries for bad JSON, %</span><anvil-component type="TextBox" name="c_retry" prop:type="number"></anvil-component></label>
+          </fieldset>
+          <p class="ui-hint tl-flat">Jev: $0.042 per million input tokens, output free (OpenRouter, Oct 2026). The LLM defaults roughly match a small model's list price; change them to yours.</p>
+        </div>
+        <div>
+          <div class="tl-kpis">
+            <div class="ui-card tl-kpi hero"><anvil-component type="Label" name="k_jev" prop:role='["tl-big"]'></anvil-component><span>Jev per month</span></div>
+            <div class="ui-card tl-kpi"><anvil-component type="Label" name="k_llm" prop:role='["tl-big"]'></anvil-component><span>LLM per month</span></div>
+            <div class="ui-card tl-kpi"><anvil-component type="Label" name="k_ratio" prop:role='["tl-big"]'></anvil-component><anvil-component type="Label" name="k_year" prop:role='["tl-sub"]'></anvil-component></div>
+          </div>
+          <div class="ui-card">
+            <h3 class="tl-h">Monthly cost</h3>
+            <div class="tl-bars">
+              <div class="tl-bar"><span><b>Jev</b></span><span class="track"><span class="fill jev" anvil:dom-node="bar_jev"></span></span><anvil-component type="Label" name="v_jev" prop:role='["tl-v"]'></anvil-component></div>
+              <div class="tl-bar"><span>LLM + JSON</span><span class="track"><span class="fill llm" anvil:dom-node="bar_llm"></span></span><anvil-component type="Label" name="v_llm" prop:role='["tl-v"]'></anvil-component></div>
+            </div>
+            <anvil-component type="Jev_Buddy.Components.Rich" name="cost_table"></anvil-component>
+            <anvil-component type="Label" name="cost_note" prop:role='["fine-print"]'></anvil-component>
+          </div>
+        </div>
+      </div>
+
+      <div anvil:name="conf_part" class="tl-grid">
+        <div class="ui-card tl-form">
+          <div class="ui-seg" role="group" aria-label="Question type">
+            <button type="button" anvil:name="t_choice" data-t="choice" anvil:on-dom:click="self.type_click">choice</button>
+            <button type="button" anvil:name="t_score" data-t="score" anvil:on-dom:click="self.type_click">score</button>
+            <button type="button" anvil:name="t_noul" data-t="noul" anvil:on-dom:click="self.type_click">noul</button>
+          </div>
+          <div anvil:name="noul_part">
+            <label class="ui-field"><span>Probability of true <anvil-component type="Label" name="noul_out" prop:role='["tl-o"]'></anvil-component></span>
+              <input type="range" min="0" max="1" step="0.01" anvil:dom-node="noul_range"></label>
+            <p class="ui-hint">Noul answers have no confidence field. TypeSafe suggests |2p − 1| when you need one.</p>
+          </div>
+          <div anvil:name="weights_part">
+            <p class="ui-hint tl-top0">Drag the raw weights; they are normalised into probabilities that sum to 1.</p>
+            <anvil-component type="RepeatingPanel" name="weights" prop:item_template="Jev_Buddy.Items.WeightRow" prop:role='["tl-sliders"]'></anvil-component>
+            <div class="ui-row tl-rows">
+              <anvil-component type="Button" name="add_row" prop:role='["btn", "btn-sm", "ic-plus"]'></anvil-component>
+              <anvil-component type="Button" name="del_row" prop:text="Remove last" prop:role='["btn", "btn-sm", "btn-ghost", "ic-x"]'></anvil-component>
+            </div>
+          </div>
+        </div>
+        <anvil-component type="Jev_Buddy.Components.Rich" name="conf_out"></anvil-component>
+      </div>
+
+      <div anvil:name="thr_part" class="tl-grid">
+        <div class="ui-card tl-form">
+          <label class="ui-field"><span>Act automatically above <anvil-component type="Label" name="o_auto" prop:role='["tl-o"]'></anvil-component></span>
+            <input type="range" min="0.5" max="0.99" step="0.01" anvil:dom-node="r_auto"></label>
+          <label class="ui-field"><span>Ask to confirm above <anvil-component type="Label" name="o_floor" prop:role='["tl-o"]'></anvil-component></span>
+            <input type="range" min="0" max="0.98" step="0.01" anvil:dom-node="r_floor"><span class="ui-hint">Below this, a person decides.</span></label>
+          <fieldset><legend>What things cost you</legend>
+            <label class="ui-field"><span>A wrong automatic decision, $</span><anvil-component type="TextBox" name="t_err" prop:type="number"></anvil-component></label>
+            <label class="ui-field"><span>A person reviewing one case, $</span><anvil-component type="TextBox" name="t_review" prop:type="number"></anvil-component></label>
+          </fieldset>
+          <p class="ui-hint tl-flat">Synthetic data: 600 decisions where higher confidence means more often right, the way calibrated probabilities behave. Use your own labelled data for real numbers (see the guide).</p>
+        </div>
+        <div>
+          <div class="tl-kpis">
+            <div class="ui-card tl-kpi hero"><anvil-component type="Label" name="k_auto" prop:role='["tl-big"]'></anvil-component><span>handled automatically</span></div>
+            <div class="ui-card tl-kpi"><anvil-component type="Label" name="k_acc" prop:role='["tl-big"]'></anvil-component><span>accuracy of the automatic ones</span></div>
+            <div class="ui-card tl-kpi"><anvil-component type="Label" name="k_wrong" prop:role='["tl-big"]'></anvil-component><span>mistakes slip through per 10k</span></div>
+          </div>
+          <div class="ui-card">
+            <h3>Where decisions go</h3>
+            <anvil-component type="Jev_Buddy.Components.Rich" name="thr_chart"></anvil-component>
+            <div class="tl-legend"><span><i class="lg-right"></i>right</span><span><i class="lg-wrong"></i>wrong</span><span>x axis: confidence</span></div>
+            <anvil-component type="Jev_Buddy.Components.Rich" name="thr_table"></anvil-component>
+            <p class="tl-flat"><anvil-component type="Label" name="thr_total" prop:role='["strong"]'></anvil-component> <anvil-component type="Label" name="thr_how" prop:role='["fine-print", "tl-inline"]'></anvil-component></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </anvil-block>
+</anvil-form>

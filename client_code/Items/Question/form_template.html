@@ -1,0 +1,27 @@
+<div class="pg-q">
+  <div class="pg-q-head">
+    <div class="ui-seg" role="group" aria-label="Question type">
+      <button type="button" class="choice" anvil:name="t_choice" data-type="choice" anvil:on-dom:click="self.type_click">choice</button>
+      <button type="button" class="noul" anvil:name="t_noul" data-type="noul" anvil:on-dom:click="self.type_click">noul</button>
+      <button type="button" class="score" anvil:name="t_score" data-type="score" anvil:on-dom:click="self.type_click">score</button>
+    </div>
+    <anvil-component type="TextBox" name="name_box" prop:role='["pg-name"]' bind:text="self.item['q']['name']"></anvil-component>
+    <anvil-component type="Button" name="del_button" prop:text="Remove question" prop:role='["btn", "btn-ghost", "btn-icon", "ic-trash", "pg-del-q"]'></anvil-component>
+  </div>
+  <anvil-component type="TextBox" name="instr_box" prop:placeholder="Instructions: what should Jev decide?" prop:role='["pg-in"]' bind:text="self.item['q']['instructions']"></anvil-component>
+  <div anvil:name="choice_part">
+    <div class="pg-sub pg-sub-top"><span>Options: label and what it means</span></div>
+    <anvil-component type="RepeatingPanel" name="options" prop:item_template="Jev_Buddy.Items.OptionRow"></anvil-component>
+    <div class="pg-sub"><anvil-component type="Button" name="add_opt" prop:text="Option" prop:role='["btn", "btn-sm", "ic-plus"]'></anvil-component><anvil-component type="Label" name="opt_count" prop:role='["t"]'></anvil-component></div>
+  </div>
+  <div anvil:name="noul_part">
+    <div class="pg-row noul"><span class="tf">true</span><anvil-component type="TextBox" name="t_box" prop:placeholder="What a yes looks like" prop:role='["pg-in"]' bind:text="self.item['q']['t']"></anvil-component></div>
+    <div class="pg-row noul"><span class="tf">false</span><anvil-component type="TextBox" name="f_box" prop:placeholder="What a no looks like" prop:role='["pg-in"]' bind:text="self.item['q']['f']"></anvil-component></div>
+    <div class="pg-sub"><span>Returns noul: the probability of true (0 to 1)</span></div>
+  </div>
+  <div anvil:name="score_part">
+    <div class="pg-sub pg-sub-top"><span>Levels, lowest first (level 0 is the first)</span></div>
+    <anvil-component type="RepeatingPanel" name="levels" prop:item_template="Jev_Buddy.Items.LevelRow"></anvil-component>
+    <div class="pg-sub"><anvil-component type="Button" name="add_lvl" prop:text="Level" prop:role='["btn", "btn-sm", "ic-plus"]'></anvil-component><anvil-component type="Label" name="lvl_range" prop:role='["t"]'></anvil-component></div>
+  </div>
+</div>

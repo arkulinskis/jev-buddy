@@ -1,0 +1,13 @@
+<div class="rc-card-host"><article class="ui-card rc-card" anvil:name="card" tabindex="0" anvil:on-dom:click="self.card_click" anvil:on-dom:keydown="self.card_key">
+  <div class="ui-row between">
+    <span class="ui-badge"><i class="ic" anvil:name="cat_icon"></i><anvil-component type="Label" name="cat_label" prop:role='["t"]'></anvil-component></span>
+    <anvil-component type="Label" name="status" prop:role='["badge"]'></anvil-component>
+  </div>
+  <h3><anvil-component type="Label" name="title" prop:role='["t"]' bind:text="self.item['title']"></anvil-component></h3>
+  <anvil-component type="Label" name="by" prop:role='["rc-by-line"]'></anvil-component>
+  <anvil-component type="Label" name="summary" prop:role='["rc-card-summary"]'></anvil-component>
+  <div class="foot"><span class="types" anvil:dom-node="types"></span><span class="ui-spacer"></span>
+    <span class="rc-forks" anvil:name="forks"><i class="ic ic-fork"></i><anvil-component type="Label" name="forks_n" prop:role='["t"]'></anvil-component></span>
+    <anvil-component type="Button" name="like_button" prop:role='["rc-like"]'></anvil-component>
+  </div>
+</article></div>

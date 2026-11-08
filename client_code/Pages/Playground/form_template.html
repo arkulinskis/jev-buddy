@@ -1,0 +1,58 @@
+<anvil-form layout="Jev_Buddy.Layouts.Shell">
+  <anvil-block slot="content">
+    <div class="ui-wrap">
+      <div class="pg-top">
+        <div class="grow">
+          <h1 class="pg-title"><anvil-component type="Label" name="title" prop:role='["t"]'></anvil-component>
+            <anvil-component type="Label" name="title_badge" prop:role='["badge"]'></anvil-component></h1>
+        </div>
+        <anvil-component type="DropDown" name="template_box" prop:role='["pg-template"]'></anvil-component>
+        <anvil-component type="Button" name="save_button" prop:text="Save" prop:role='["btn", "ic-save"]'></anvil-component>
+      </div>
+      <div class="pg-grid">
+        <div class="pg-col">
+          <div class="pg-state">
+            <div class="pg-label"><span>State</span><anvil-component type="Label" name="state_kind" prop:role='["pg-kind"]'></anvil-component></div>
+            <anvil-component type="TextArea" name="state_box" prop:placeholder="Paste a customer message, a document, or a JSON object" prop:role='["pg-state-box"]'></anvil-component>
+          </div>
+          <div class="pg-label pg-label-q"><anvil-component type="Label" name="q_count" prop:role='["t"]'></anvil-component></div>
+          <anvil-component type="RepeatingPanel" name="questions" prop:item_template="Jev_Buddy.Items.Question"></anvil-component>
+          <div class="pg-add">
+            <anvil-component type="Button" name="add_choice" prop:text="choice" prop:role='["btn", "btn-sm", "ic-plus"]'></anvil-component>
+            <anvil-component type="Button" name="add_noul" prop:text="noul" prop:role='["btn", "btn-sm", "ic-plus"]'></anvil-component>
+            <anvil-component type="Button" name="add_score" prop:text="score" prop:role='["btn", "btn-sm", "ic-plus"]'></anvil-component>
+          </div>
+        </div>
+        <div class="pg-col pg-right">
+          <div class="ui-card">
+            <div class="pg-run">
+              <anvil-component type="Button" name="run_button" prop:text="Run" prop:role='["btn", "btn-primary", "btn-lg", "ic-play", "pg-run-btn"]'></anvil-component>
+              <div class="pg-mode">
+                <div anvil:name="mode_live"><span class="jb-live-flag">Live</span>
+                  <span anvil:name="live_self">Real answers from this site's own <a href="#opensource">open-source decision model</a> (<anvil-component type="Label" name="self_model" prop:role='["t"]'></anvil-component>): your text doesn't go to TypeSafe or OpenRouter</span><span anvil:name="live_or">Real Jev calls via OpenRouter (<anvil-component type="Label" name="or_model" prop:role='["t"]'></anvil-component>)</span><anvil-component type="Label" name="left" prop:role='["t"]'></anvil-component>.</div>
+                <div anvil:name="mode_signin"><span class="jb-sim-flag">Simulator</span> Live runs are on: <a href="#auth" anvil:on-dom:click="self.signin_click">sign in</a> to run on <anvil-component type="Label" name="signin_target" prop:role='["t"]'></anvil-component>.</div>
+                <div anvil:name="mode_sim"><span class="jb-sim-flag">Simulator</span> Shows Jev's exact response shape using keyword overlap, not the real model. For real answers, copy the code with your own key.</div>
+              </div>
+            </div>
+            <nav class="ui-tabs pg-tabs" aria-label="Output">
+              <anvil-component type="Button" name="tab_answers" prop:text="Answers" prop:role='["pg-tab", "ic-sparkle"]'></anvil-component>
+              <anvil-component type="Button" name="tab_request" prop:text="Request" prop:role='["pg-tab", "ic-code"]'></anvil-component>
+              <anvil-component type="Button" name="tab_code" prop:text="Code" prop:role='["pg-tab", "ic-copy"]'></anvil-component>
+            </nav>
+            <div class="pg-out">
+              <anvil-component type="Label" name="errors" prop:role='["msg-error", "pg-err"]'></anvil-component>
+              <anvil-component type="Label" name="note" prop:role='["msg-note", "pg-err"]'></anvil-component>
+              <div class="pg-empty" anvil:name="empty">
+                <i class="ic ic-play"></i>
+                <h3>Press Run</h3>
+                <p class="small">Answers show up here as cards. <span class="pg-kbd">Ctrl + Enter works too.</span></p>
+              </div>
+              <anvil-component type="Jev_Buddy.Components.Rich" name="out"></anvil-component>
+              <p class="small muted" anvil:name="code_hint">Set <code>OPENROUTER_API_KEY</code> (or <code>TYPESAFE_API_KEY</code> for the SDK tab) and run it. The <b>Self-hosted</b> tab sends the same request to an open-source model on your own machine instead: <a href="#opensource">set one up</a>.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </anvil-block>
+</anvil-form>

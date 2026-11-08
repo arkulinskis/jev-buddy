@@ -1,0 +1,7 @@
+<div class="os-card-host"><button type="button" class="ui-card os-card" anvil:name="card" anvil:on-dom:click="self.card_click">
+  <span class="top"><anvil-component type="Label" name="name" prop:role='["os-name"]' bind:text="self.item['name']"></anvil-component>
+    <anvil-component type="Label" name="badge" prop:role='["badge"]'></anvil-component></span>
+  <anvil-component type="Label" name="pitch" prop:role='["os-pitch"]' bind:text="self.item['pitch']"></anvil-component>
+  <span class="tags"><anvil-component type="Label" name="lic" prop:role='["badge", "badge-mono"]' bind:text="self.item['lic']"></anvil-component>
+    <anvil-component type="Label" name="server" prop:role='["badge"]' bind:text="self.item['server']"></anvil-component></span>
+</button></div>

@@ -1,0 +1,133 @@
+<anvil-form layout="Jev_Buddy.Layouts.Shell">
+  <anvil-block slot="content">
+    <div class="ui-wrap">
+      <div class="ui-page-head"><div><h1>Admin</h1><p class="muted">Only admins see this page.</p></div></div>
+      <nav class="ui-tabs" aria-label="Admin">
+        <a href="#admin/overview" anvil:name="tab_overview"><i class="ic ic-grid"></i>Overview</a>
+        <a href="#admin/feedback" anvil:name="tab_feedback"><i class="ic ic-inbox"></i>Feedback</a>
+        <a href="#admin/users" anvil:name="tab_users"><i class="ic ic-users"></i>Users</a>
+        <a href="#admin/jev" anvil:name="tab_jev"><i class="ic ic-bolt"></i>Jev API</a>
+        <a href="#admin/recipes" anvil:name="tab_recipes"><i class="ic ic-save"></i>Recipes</a>
+        <a href="#admin/demo" anvil:name="tab_demo"><i class="ic ic-database"></i>Demo data</a>
+      </nav>
+
+      <div anvil:name="overview_part">
+        <div class="ad-stats">
+          <a class="ui-card ui-stat ad-stat" href="#admin/users"><anvil-component type="Label" name="s_users" prop:role='["stat-num"]'></anvil-component><span>people signed up</span></a>
+          <a class="ui-card ui-stat ad-stat" href="#admin/users"><anvil-component type="Label" name="s_admins" prop:role='["stat-num"]'></anvil-component><anvil-component type="Label" name="s_admins_label" prop:role='["fine-print"]'></anvil-component></a>
+          <a class="ui-card ui-stat ad-stat" href="#admin/feedback"><anvil-component type="Label" name="s_feedback" prop:role='["stat-num"]'></anvil-component><span>new feedback</span></a>
+          <a class="ui-card ui-stat ad-stat" href="#admin/recipes"><anvil-component type="Label" name="s_recipes" prop:role='["stat-num"]'></anvil-component><span>recipes by members</span></a>
+          <a class="ui-card ui-stat ad-stat" href="#admin/recipes"><anvil-component type="Label" name="s_public" prop:role='["stat-num"]'></anvil-component><span>shared recipes</span></a>
+          <a class="ui-card ui-stat ad-stat" href="#admin/jev"><anvil-component type="Label" name="s_runs" prop:role='["stat-num"]'></anvil-component><span>live Jev runs today</span></a>
+        </div>
+        <anvil-component type="Label" name="live_line" prop:role='["fine-print", "ad-demo-line"]'></anvil-component>
+        <anvil-component type="Label" name="demo_line" prop:role='["fine-print", "ad-demo-line"]'></anvil-component>
+      </div>
+
+      <div anvil:name="feedback_part">
+        <div class="ui-row ad-filter">
+          <div class="ui-seg">
+            <anvil-component type="Button" name="f_new" prop:text="New" prop:role='["seg"]'></anvil-component>
+            <anvil-component type="Button" name="f_read" prop:text="Read" prop:role='["seg"]'></anvil-component>
+            <anvil-component type="Button" name="f_done" prop:text="Done" prop:role='["seg"]'></anvil-component>
+            <anvil-component type="Button" name="f_all" prop:text="All" prop:role='["seg"]'></anvil-component>
+          </div>
+        </div>
+        <anvil-component type="RepeatingPanel" name="feedback_panel" prop:item_template="Jev_Buddy.Items.FeedbackRow" prop:role='["ad-fb"]'></anvil-component>
+        <div class="ui-empty" anvil:name="no_feedback">
+          <i class="ic ic-inbox"></i>
+          <h2>No messages here</h2>
+          <p>New feedback goes to Prepsto (prepsto.com). Older messages and requests from the app show up here.</p>
+        </div>
+      </div>
+
+      <div anvil:name="users_part">
+        <div class="ui-row ad-search">
+          <anvil-component type="TextBox" name="search_box" prop:placeholder="Search by name or email" prop:role='["ad-search-box"]'></anvil-component>
+          <anvil-component type="Button" name="search_button" prop:text="Search" prop:role='["btn", "ic-search"]'></anvil-component>
+          <anvil-component type="Label" name="users_count" prop:role='["fine-print"]'></anvil-component>
+        </div>
+        <div class="ad-table ad-users-head"><b>Name</b><b>Email</b><b>Joined</b><b>Admin</b><b>Active</b></div>
+        <anvil-component type="RepeatingPanel" name="users_panel" prop:item_template="Jev_Buddy.Items.UserRow"></anvil-component>
+      </div>
+
+      <div anvil:name="jev_part">
+        <div class="ui-grid two">
+          <div class="ui-card ui-stack ad-jev">
+            <h3>Live playground runs</h3>
+            <p class="muted small">Signed-in members can run real decisions from the playground. Pick where the text goes. Keys stay on the server and are never sent to browsers.</p>
+            <div class="ad-provs" role="radiogroup" aria-label="Where live runs go">
+              <div class="ad-prov" anvil:name="prov_or_box">
+                <anvil-component type="RadioButton" name="prov_or" prop:text="Jev through OpenRouter" prop:group_name="provider" prop:value="openrouter"></anvil-component>
+                <small>TypeSafe's closed model. The text goes to OpenRouter and TypeSafe; about $0.00001 a run.</small>
+              </div>
+              <div class="ad-prov" anvil:name="prov_self_box">
+                <anvil-component type="RadioButton" name="prov_self" prop:text="Your own open-source server" prop:group_name="provider" prop:value="selfhosted"></anvil-component>
+                <small>Laya, Kev, jevos, Ollaya… on a machine you run. The text stays with you.</small>
+              </div>
+            </div>
+            <fieldset class="ad-fs" anvil:name="or_fields"><legend>OpenRouter</legend>
+              <label class="ui-field"><span>OpenRouter API key <anvil-component type="Label" name="key_state" prop:role='["ad-em"]'></anvil-component></span>
+                <anvil-component type="TextBox" name="key_box" prop:hide_text="true"></anvil-component></label>
+              <label class="ui-field"><span>Model</span><anvil-component type="TextBox" name="model_box"></anvil-component></label>
+              <anvil-component type="Button" name="clear_or" prop:text="Remove the OpenRouter key" prop:role='["btn", "btn-sm", "btn-danger", "ic-trash"]'></anvil-component>
+            </fieldset>
+            <fieldset class="ad-fs" anvil:name="self_fields"><legend>Your server</legend>
+              <label class="ui-field"><span>Server address (HTTPS)</span><anvil-component type="TextBox" name="url_box" prop:type="url" prop:placeholder="https://decide.example.com"></anvil-component></label>
+              <p class="muted small ad-fs-note">Any server that speaks TypeSafe's <code>POST /v1/systemone</code> format. We add <code>/v1/systemone</code> for you. Anvil runs on the internet, so <code>localhost</code> won't work: put the server behind HTTPS first (see <a href="#opensource/expose">how</a>).</p>
+              <label class="ui-field"><span>Server key <anvil-component type="Label" name="local_key_state" prop:role='["ad-em"]'></anvil-component></span>
+                <anvil-component type="TextBox" name="local_key_box" prop:hide_text="true"></anvil-component></label>
+              <label class="ui-field"><span>Model name <em>(optional)</em></span><anvil-component type="TextBox" name="local_model_box" prop:placeholder="Empty if the server hosts one model, e.g. kev-latest"></anvil-component></label>
+              <anvil-component type="Button" name="clear_self" prop:text="Forget this server" prop:role='["btn", "btn-sm", "btn-danger", "ic-trash"]'></anvil-component>
+              <div class="ui-note small">The Privacy Policy still says live runs go to OpenRouter and TypeSafe. Update it before switching live runs to your server.</div>
+            </fieldset>
+            <div class="ui-grid two ad-limits">
+              <label class="ui-field"><span>Shared runs per day</span><anvil-component type="TextBox" name="cap_box" prop:type="number"></anvil-component></label>
+              <label class="ui-field"><span>Per person per hour</span><anvil-component type="TextBox" name="per_box" prop:type="number"></anvil-component></label>
+            </div>
+            <div class="ad-enabled">
+              <anvil-component type="CheckBox" name="enabled_box" prop:text="Live runs on"></anvil-component>
+              <anvil-component type="Label" name="enabled_hint" prop:role='["fine-print"]' prop:text="(save a key or a server address first)"></anvil-component>
+            </div>
+            <div class="ui-row">
+              <anvil-component type="Button" name="save_jev" prop:text="Save" prop:role='["btn", "btn-primary", "ic-save"]'></anvil-component>
+              <anvil-component type="Button" name="test_jev" prop:role='["btn", "ic-play"]'></anvil-component>
+            </div>
+            <anvil-component type="Label" name="endpoint_line" prop:role='["fine-print"]'></anvil-component>
+            <anvil-component type="Label" name="jev_result" prop:visible="false"></anvil-component>
+          </div>
+          <div class="ui-card">
+            <h3>Usage</h3>
+            <div class="ad-stats ad-usage">
+              <div class="ui-stat"><anvil-component type="Label" name="u_live" prop:role='["stat-num"]'></anvil-component><span>live runs</span></div>
+              <div class="ui-stat"><anvil-component type="Label" name="u_today" prop:role='["stat-num"]'></anvil-component><span>runs today</span></div>
+              <div class="ui-stat"><anvil-component type="Label" name="u_errors" prop:role='["stat-num"]'></anvil-component><span>errors today</span></div>
+              <div class="ui-stat"><anvil-component type="Label" name="u_total" prop:role='["stat-num"]'></anvil-component><span>runs in total</span></div>
+              <div class="ui-stat"><anvil-component type="Label" name="u_cost" prop:role='["stat-num"]'></anvil-component><span>spent in total</span></div>
+              <div class="ui-stat"><anvil-component type="Label" name="u_ms" prop:role='["stat-num"]'></anvil-component><span>average latency</span></div>
+            </div>
+            <p class="muted small ad-usage-note">We log the size, cost, speed and errors of each run, never the text people send.</p>
+          </div>
+        </div>
+      </div>
+
+      <div anvil:name="recipes_part">
+        <p class="muted small ad-rc-note">Shared recipes. Hiding one takes it out of Community recipes; its owner still sees it, marked as hidden. Private recipes are never shown here.</p>
+        <anvil-component type="RepeatingPanel" name="recipes_panel" prop:item_template="Jev_Buddy.Items.AdminRecipe" prop:role='["ui-list-panel"]'></anvil-component>
+        <div class="ui-empty" anvil:name="no_recipes"><i class="ic ic-save"></i><h2>No shared recipes yet</h2></div>
+      </div>
+
+      <div anvil:name="demo_part">
+        <div class="ui-card ui-narrow ad-demo">
+          <h3>Demo data</h3>
+          <p class="muted">Example people and content, so the app never looks empty for the first visitors. Demo rows are flagged, so removing them never touches real data. Once removed, it stays removed until you load it again.</p>
+          <anvil-component type="Label" name="demo_status"></anvil-component>
+          <div class="ui-row">
+            <anvil-component type="Button" name="demo_load_button" prop:text="Load demo data" prop:role='["btn", "btn-primary", "ic-refresh"]'></anvil-component>
+            <anvil-component type="Button" name="demo_remove_button" prop:text="Remove demo data" prop:role='["btn", "btn-danger", "ic-trash"]'></anvil-component>
+          </div>
+        </div>
+      </div>
+    </div>
+  </anvil-block>
+</anvil-form>

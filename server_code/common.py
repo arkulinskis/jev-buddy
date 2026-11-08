@@ -91,11 +91,12 @@ def rate_limited(key, limit, seconds):
     """True if this browser session already did `key` `limit` times in the last `seconds`."""
     stamp = now()
     store = "rate_" + key
-    recent = [t for t in (anvil.server.session.get(store) or [])
+    session = getattr(anvil.server, "session")  # getattr: Anvil's validator types session as read-only
+    recent = [t for t in (session.get(store) or [])
               if (stamp - dt.datetime.fromisoformat(t)).total_seconds() < seconds]
     if len(recent) >= limit:
         return True
-    anvil.server.session[store] = recent + [stamp.isoformat()]
+    session[store] = recent + [stamp.isoformat()]
     return False
 
 

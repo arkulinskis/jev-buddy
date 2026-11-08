@@ -1,0 +1,68 @@
+<anvil-form layout="Jev_Buddy.Layouts.Shell">
+  <anvil-block slot="content">
+    <div class="ui-wrap">
+      <div anvil:name="list_part">
+        <div class="ui-page-head">
+          <div>
+            <anvil-component type="Label" name="list_title" prop:role='["page-title"]'></anvil-component>
+            <anvil-component type="Label" name="list_lead" prop:role='["rc-lead"]'></anvil-component>
+          </div>
+          <a class="ui-btn primary" href="#playground"><i class="ic ic-plus"></i>New in the playground</a>
+        </div>
+        <nav class="ui-tabs" aria-label="Recipes">
+          <a href="#recipes" anvil:name="tab_community"><i class="ic ic-users"></i>Community</a>
+          <a href="#recipes/mine" anvil:name="tab_mine"><i class="ic ic-save"></i>Mine</a>
+        </nav>
+        <div anvil:name="filters" class="rc-bar">
+          <anvil-component type="TextBox" name="search_box" prop:placeholder="Search recipes" prop:type="search" prop:role='["rc-search"]'></anvil-component>
+          <anvil-component type="DropDown" name="cat_box" prop:role='["rc-cat"]'></anvil-component>
+          <div class="ui-seg" role="group" aria-label="Sort" anvil:name="sort_seg">
+            <button type="button" anvil:name="sort_top" data-s="top" anvil:on-dom:click="self.sort_click">Top</button>
+            <button type="button" anvil:name="sort_new" data-s="new" anvil:on-dom:click="self.sort_click">New</button>
+          </div>
+        </div>
+        <anvil-component type="Label" name="count" prop:role='["fine-print", "rc-count"]'></anvil-component>
+        <anvil-component type="RepeatingPanel" name="cards" prop:item_template="Jev_Buddy.Items.RecipeCard" prop:role='["rc-grid"]'></anvil-component>
+        <div class="ui-empty" anvil:name="empty">
+          <i class="ic" anvil:name="empty_icon"></i>
+          <anvil-component type="Label" name="empty_title" prop:role='["rc-empty-title"]'></anvil-component>
+          <anvil-component type="Label" name="empty_text" prop:role='["rc-empty-text"]'></anvil-component>
+          <a class="ui-btn primary" href="#playground" anvil:name="empty_link"><anvil-component type="Label" name="empty_link_label" prop:role='["t"]'></anvil-component></a>
+        </div>
+      </div>
+
+      <div anvil:name="detail_part">
+        <a class="ui-btn ghost sm" href="#recipes" anvil:name="back_link"><i class="ic ic-back"></i><anvil-component type="Label" name="back_label" prop:role='["t"]'></anvil-component></a>
+        <div class="rc-d-head">
+          <div class="rc-d-main">
+            <div class="ui-row rc-badges">
+              <span class="ui-badge"><i class="ic" anvil:name="cat_icon"></i><anvil-component type="Label" name="cat_label" prop:role='["t"]'></anvil-component></span>
+              <span class="ui-badge warn" anvil:name="hidden_badge">Hidden by a moderator</span>
+              <span class="ui-badge" anvil:name="private_badge">Private</span>
+            </div>
+            <anvil-component type="Label" name="title" prop:role='["rc-title"]'></anvil-component>
+            <anvil-component type="Label" name="summary" prop:role='["rc-summary"]'></anvil-component>
+            <anvil-component type="Label" name="byline" prop:role='["fine-print", "mono", "rc-by"]'></anvil-component>
+          </div>
+          <div class="ui-row">
+            <anvil-component type="Button" name="like_button" prop:role='["rc-like"]'></anvil-component>
+            <anvil-component type="Button" name="try_button" prop:role='["btn", "btn-primary", "ic-play"]'></anvil-component>
+            <anvil-component type="Button" name="delete_button" prop:text="Delete" prop:role='["btn", "btn-danger", "ic-trash"]'></anvil-component>
+          </div>
+        </div>
+        <section class="rc-sec"><div class="pg-label">State</div>
+          <anvil-component type="Label" name="state_text" prop:role='["rc-state"]'></anvil-component></section>
+        <section class="rc-sec"><anvil-component type="Label" name="q_count" prop:role='["pg-label"]'></anvil-component>
+          <anvil-component type="RepeatingPanel" name="questions" prop:item_template="Jev_Buddy.Items.RecipeQuestion" prop:role='["rc-qs"]'></anvil-component></section>
+        <section class="rc-sec"><div class="pg-label">Code</div>
+          <anvil-component type="Jev_Buddy.Components.Rich" name="code"></anvil-component></section>
+      </div>
+
+      <div class="ui-empty" anvil:name="missing">
+        <i class="ic ic-search"></i>
+        <anvil-component type="Label" name="missing_text" prop:role='["rc-empty-title"]'></anvil-component>
+        <a class="ui-btn" href="#recipes">Back to recipes</a>
+      </div>
+    </div>
+  </anvil-block>
+</anvil-form>

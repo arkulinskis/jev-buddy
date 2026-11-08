@@ -1,0 +1,163 @@
+<anvil-form layout="Jev_Buddy.Layouts.Shell">
+  <anvil-block slot="content">
+    <div class="page-landing">
+      <section class="lp-hero">
+        <div class="ui-wrap">
+          <div>
+            <h1>Stop parsing LLM prose. <em>Ask for a decision.</em></h1>
+            <p class="lp-lead">Jev is an AI model that doesn't write text: it answers typed questions about your data with calibrated probabilities. Jev Buddy, the developer's field guide, shows you exactly how to use it, with copy-paste code, real business examples and a playground.</p>
+            <div class="lp-cta">
+              <a class="ui-btn primary lg" href="#learn/quickstart"><i class="ic ic-bolt"></i>First call in 5 minutes</a>
+              <a class="ui-btn lg" href="#playground"><i class="ic ic-play"></i>Open the playground</a>
+            </div>
+            <div class="lp-proof">
+              <span><i class="ic ic-check"></i>Free, no account needed</span>
+              <span><i class="ic ic-check"></i>Python · TypeScript · curl</span>
+              <span><i class="ic ic-check"></i>12 business use cases</span>
+              <a href="#auth/signup" anvil:name="join_link"><i class="ic ic-save"></i>Join free to save recipes</a>
+            </div>
+          </div>
+          <anvil-component type="Jev_Buddy.Components.Hero" name="hero"></anvil-component>
+        </div>
+      </section>
+
+      <section class="lp-section ytf" id="watch">
+        <div class="ui-wrap">
+          <div class="ytf-in">
+            <div class="ytf-copy">
+              <h2>See Jev Buddy in about a minute</h2>
+              <p>A short video tour of what Jev Buddy does and how it works.</p>
+              <a class="ytf-link" href="https://www.youtube.com/watch?v=pGgzeKsxuk0" target="_blank" rel="noopener"><svg viewBox="0 0 28 20" width="20" height="14" aria-hidden="true"><rect width="28" height="20" rx="5" fill="#FF0033"/><path d="M11.2 5.8v8.4l7.3-4.2z" fill="#fff"/></svg>Watch on YouTube &#8599;</a>
+            </div>
+            <div>
+              <div class="ytf-frame" anvil:dom-node="yt_frame">
+                <button type="button" class="ytf-cover" anvil:dom-node="yt_cover" aria-label="Play the Jev Buddy video (1:15)">
+                  <img src="_/theme/yt-cover.jpg" alt="" loading="lazy" decoding="async" width="960" height="540">
+                  <span class="ytf-play" aria-hidden="true"><svg viewBox="0 0 68 48" width="68" height="48"><path d="M66.5 7.7a8.5 8.5 0 0 0-6-6C55.3.3 34 .3 34 .3s-21.3 0-26.5 1.4a8.5 8.5 0 0 0-6 6C.1 13 .1 24 .1 24s0 11 1.4 16.3a8.5 8.5 0 0 0 6 6c5.2 1.4 26.5 1.4 26.5 1.4s21.3 0 26.5-1.4a8.5 8.5 0 0 0 6-6C67.9 35 67.9 24 67.9 24s0-11-1.4-16.3z" fill="#FF0033"/><path d="M45 24 27 14v20z" fill="#fff"/></svg></span>
+                  <span class="ytf-len">1:15</span>
+                </button>
+              </div>
+              <p class="ytf-note">The video loads from YouTube when you press play.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="lp-section lp-stats-sec">
+        <div class="ui-wrap">
+          <div class="lp-stats">
+            <div><b>$0.042</b><span>per million input tokens</span></div>
+            <div><b><em>$0</em></b><span>for output: there is none</span></div>
+            <div><b>~0.21 s</b><span>median latency</span></div>
+            <div><b>3</b><span>question types: choice, noul, score</span></div>
+          </div>
+          <p class="small faint lp-note">Prices and latency as reported for OpenRouter in October 2026. Check the provider before you budget.</p>
+        </div>
+      </section>
+
+      <section class="lp-section">
+        <div class="ui-wrap">
+          <div class="lp-head">
+            <h2>Your LLM is writing essays to answer yes-or-no questions</h2>
+            <p>Most "AI decisions" in production are classification in disguise: route this, flag that, rate the other. Generating text for them is slow, costly and fragile.</p>
+          </div>
+          <div class="lp-vs">
+            <div class="ui-card">
+              <h3 class="bad"><i class="ic ic-x"></i>The LLM way</h3>
+              <anvil-component type="Jev_Buddy.Components.Rich" name="code_llm"></anvil-component>
+              <ul><li>Pays for output tokens nobody reads</li><li>Labels drift, JSON breaks, retries pile up</li><li>"How sure are you?" gets a made-up number</li></ul>
+            </div>
+            <div class="ui-card">
+              <h3 class="good"><i class="ic ic-check"></i>The Jev way</h3>
+              <anvil-component type="Jev_Buddy.Components.Rich" name="code_jev"></anvil-component>
+              <ul><li>Input tokens only, about a fifth of a second</li><li>Always one of your options, never malformed</li><li>Probabilities you can put thresholds on</li></ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="lp-section">
+        <div class="ui-wrap">
+          <div class="lp-head"><h2>Three questions cover almost every decision</h2></div>
+          <div class="lp-prims">
+            <a class="ui-card lp-prim" href="#learn/choice"><span class="jb-type choice">choice</span><h3>Pick one</h3><p>Which team, which category, which intent. Probabilities for every option.</p>
+              <anvil-component type="Jev_Buddy.Components.Rich" name="prim_probs"></anvil-component></a>
+            <a class="ui-card lp-prim" href="#learn/noul"><span class="jb-type noul">noul</span><h3>Yes or no</h3><p>Is it a refund? Is it an injection? One probability from 0 to 1.</p>
+              <div class="jb-meter lp-meter"><i style="left:94%"></i></div><div class="jb-meter-lbl"><span>false</span><span>unsure</span><span>true</span></div></a>
+            <a class="ui-card lp-prim" href="#learn/score"><span class="jb-type score">score</span><h3>Rate on your scale</h3><p>Urgency, sentiment, relevance, risk: 2 to 10 levels you define.</p>
+              <div class="jb-scale"><div class="jb-scale-track"><b style="width:82%"></b><i style="left:82%"></i></div><div class="jb-scale-ticks"><span>0 calm</span><span>1</span><span>2 urgent</span></div></div></a>
+          </div>
+        </div>
+      </section>
+
+      <section class="lp-section">
+        <div class="ui-wrap">
+          <div class="lp-head"><h2>State in, typed answers out</h2></div>
+          <div class="lp-steps">
+            <div class="ui-card lp-step"><h3>Send the state</h3><p class="muted">A ticket, an email, a contract clause, or a JSON record with just the fields that matter.</p></div>
+            <div class="ui-card lp-step"><h3>Ask typed questions</h3><p class="muted">Name each question and describe what every answer looks like. Ask several at once: they run in parallel.</p></div>
+            <div class="ui-card lp-step"><h3>Branch on numbers</h3><p class="muted">Compare probabilities to thresholds. Act when confident, ask a person when not.</p></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="lp-section">
+        <div class="ui-wrap">
+          <div class="lp-head"><h2>Where teams use it</h2><p>Each one comes with the request, the answer, the routing code and the monthly cost.</p></div>
+          <anvil-component type="RepeatingPanel" name="uses_panel" prop:item_template="Jev_Buddy.Items.UseCard" prop:role='["lp-uses"]'></anvil-component>
+          <div class="lp-more"><a class="ui-btn" href="#examples">All 12 use cases <i class="ic ic-arrow"></i></a></div>
+        </div>
+      </section>
+
+      <section class="lp-section">
+        <div class="ui-wrap">
+          <div class="lp-head"><h2>Something for everyone on the team</h2></div>
+          <div class="lp-aud">
+            <div class="ui-card"><i class="ic ic-code"></i><h3>Developers</h3><ul><li>A 16-chapter guide, from first call to production</li><li>Code in Python, TypeScript and curl, plus TypeSafe's SDK</li><li>A playground that writes the code for you</li></ul></div>
+            <div class="ui-card"><i class="ic ic-layers"></i><h3>Product and ops leads</h3><ul><li>Twelve worked business cases</li><li>Where to put humans in the loop</li><li>A threshold simulator to set automation levels</li></ul></div>
+            <div class="ui-card"><i class="ic ic-wallet"></i><h3>Founders and finance</h3><ul><li>A cost calculator against your current LLM</li><li>Monthly cost for every use case</li><li>Honest limits: when not to use it</li></ul></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="lp-section">
+        <div class="ui-wrap">
+          <div class="lp-band lp-os">
+            <div>
+              <h2>Rather keep your data at home? Go open source.</h2>
+              <p>Jev only runs on TypeSafe's servers. Laya, Kev, jevos and Ollaya answer the same choice, yes/no and score questions on your own machine, and several take the exact same request. We show you how to install and use each one.</p>
+            </div>
+            <div class="ui-row"><a class="ui-btn primary lg" href="#opensource"><i class="ic ic-unlock"></i>Open-source alternatives</a></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="lp-section">
+        <div class="ui-wrap">
+          <div class="lp-head"><h2>Questions</h2></div>
+          <div class="lp-faq">
+            <details><summary>What exactly is Jev?</summary><p>A "System One" decision model from TypeSafe AI, launched in September 2026. You give it state and typed questions; it returns choices, yes/no probabilities and scores. It never generates text.</p></details>
+            <details><summary>Is Jev Buddy made by TypeSafe?</summary><p>No. Jev Buddy is an independent guide. We link every source we used, and the official docs always win.</p></details>
+            <details><summary>Do I need an account here?</summary><p>No. The guide, use cases, tools and playground simulator are free and open. An account lets you save and share recipes, and run real Jev calls in the playground when live runs are switched on.</p></details>
+            <details><summary>Is the playground real?</summary><p>It shows a clearly labelled simulation (keyword overlap) unless live runs are on, in which case signed-in members get real Jev answers through OpenRouter. The Code tab gives you a script to run with your own key either way.</p></details>
+            <details><summary>Can I use it without sending data to TypeSafe?</summary><p>Not with Jev itself: it is closed and only runs on TypeSafe's servers. Open-source models such as Laya, Kev and jevos run on your own computer or server and answer the same kinds of questions. Our Open source page shows how to install and call each one, and the playground's Code tab has a Self-hosted version of every request.</p></details>
+            <details><summary>Can Jev extract names, amounts or dates?</summary><p>Not directly: it doesn't write text. It answers questions with answer spaces you define (categories, yes/no, levels). Pair it with a parser or an LLM for free values; the guide shows how.</p></details>
+            <details><summary>How accurate is it?</summary><p>Very good on simple, focused questions; less so on complex or ambiguous ones, which then get lower confidence. Measure it on a labelled sample of your own data before automating anything that matters.</p></details>
+          </div>
+        </div>
+      </section>
+
+      <section class="lp-section">
+        <div class="ui-wrap">
+          <div class="lp-band">
+            <div><h2>Ship your first decision today</h2><p>Five minutes from API key to a routed ticket.</p></div>
+            <div class="ui-row">
+              <a class="ui-btn primary lg" href="#learn/quickstart"><i class="ic ic-bolt"></i>Start the quickstart</a>
+              <a class="ui-btn lg" href="#auth/signup" anvil:name="band_link"><span anvil:dom-node="band_text">Join free</span></a>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </anvil-block>
+</anvil-form>

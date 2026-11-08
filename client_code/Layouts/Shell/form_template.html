@@ -1,0 +1,97 @@
+---
+layout_metadata:
+  title: App frame
+  description: Header with the menu and account button, the page in the middle, the footer and the phone tab bar with its More sheet
+---
+<div class="ui ui-shell">
+  <header class="ui-header">
+    <div class="ui-header-in">
+      <a class="ui-brand" href="#landing" aria-label="Jev Buddy home">
+        <img src="_/theme/icon.svg" alt="" width="32" height="32"><span>Jev<b>Buddy</b></span>
+      </a>
+      <nav class="ui-nav" aria-label="Main">
+        <anvil-component type="RepeatingPanel" name="nav_panel" prop:item_template="Jev_Buddy.Items.NavLink" prop:role='["contents"]'></anvil-component>
+      </nav>
+      <div class="ui-header-right">
+        <div class="ui-row" anvil:name="guest_actions">
+          <a class="ui-btn ghost" href="#auth">Sign in</a>
+          <a class="ui-btn primary" href="#auth/signup">Join free</a>
+        </div>
+        <div anvil:name="member_actions">
+          <anvil-component type="Button" name="avatar_button" prop:role='["avatar"]' prop:tooltip="Your account"></anvil-component>
+          <div class="ui-menu" anvil:name="menu">
+            <div class="ui-menu-head">
+              <anvil-component type="Label" name="menu_name" prop:role='["menu-name"]'></anvil-component>
+              <anvil-component type="Label" name="menu_email" prop:role='["menu-email"]'></anvil-component>
+            </div>
+            <a href="#recipes/mine"><i class="ic ic-save"></i>My recipes</a>
+            <a href="#profile"><i class="ic ic-user"></i>Your profile</a>
+            <a href="#admin" anvil:name="admin_link"><i class="ic ic-shield"></i>Admin</a>
+            <div class="ui-menu-block"><span class="small muted">Appearance</span>
+              <div class="ui-seg" role="group" aria-label="Appearance">
+                <button type="button" data-theme-set="auto" anvil:name="theme_auto" anvil:on-dom:click="self.theme_click">Auto</button>
+                <button type="button" data-theme-set="light" anvil:name="theme_light" anvil:on-dom:click="self.theme_click">Light</button>
+                <button type="button" data-theme-set="dark" anvil:name="theme_dark" anvil:on-dom:click="self.theme_click">Dark</button>
+              </div>
+            </div>
+            <button type="button" anvil:on-dom:click="self.feedback_click"><i class="ic ic-chat"></i>Submit feedback</button>
+            <button type="button" data-lk-open="overview"><i class="ic ic-lock"></i>Privacy &amp; Terms</button>
+            <button type="button" anvil:on-dom:click="self.sign_out_click"><i class="ic ic-logout"></i>Sign out</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="ui-main">
+    <anvil-slot name="content"></anvil-slot>
+  </main>
+
+  <footer class="ui-footer">
+    <div class="ui-footer-in">
+      <div class="ui-footer-brand">
+        <a class="ui-brand" href="#landing" aria-label="Jev Buddy home"><img src="_/theme/icon.svg" alt="" width="32" height="32"><span>Jev<b>Buddy</b></span></a>
+        <p class="muted small">The friendly field guide to Jev, the AI model that makes decisions instead of writing text.</p>
+        <p class="small muted ui-footer-org">Contact developer: <a href="https://arkvital.com" target="_blank" rel="noopener">arkvital.com</a><br>Parent company: <a href="https://addanapp.com" target="_blank" rel="noopener">addanapp.com</a></p>
+      </div>
+      <div class="ui-footer-links">
+        <a href="#learn/quickstart">Quickstart</a>
+        <a href="#learn/choice">Choice</a>
+        <a href="#learn/noul">Noul</a>
+        <a href="#learn/score">Score</a>
+        <a href="#examples">Use cases</a>
+        <a href="#tools">Cost calculator</a>
+        <a href="#opensource">Open source</a>
+        <a href="#learn/resources">Sources</a>
+        <a href="https://prepsto.com/#f/ntbztc7" target="_blank" rel="noopener" data-prepsto-open>Submit feedback</a>
+        <button type="button" data-lk-open="overview">Privacy &amp; Terms</button>
+      </div>
+      <div class="ui-footer-legal">
+        <anvil-component type="Label" name="copyright_label" prop:role='["fine-print"]'></anvil-component>
+      </div>
+    </div>
+  </footer>
+
+  <nav class="ui-tabbar" aria-label="Main">
+    <anvil-component type="RepeatingPanel" name="tab_panel" prop:item_template="Jev_Buddy.Items.NavLink" prop:role='["contents"]'></anvil-component>
+    <a href="#landing" class="more" anvil:name="more_link" anvil:on-dom:click="self.more_click" aria-haspopup="true" aria-expanded="false"><i class="ic ic-menu"></i><span>More</span></a>
+    <div class="jb-sheet" anvil:name="sheet">
+      <a href="#opensource"><i class="ic ic-unlock"></i>Open source</a>
+      <a href="#tools"><i class="ic ic-calc"></i>Tools</a>
+      <a href="#landing"><i class="ic ic-info"></i>About Jev Buddy</a>
+      <div anvil:name="sheet_member" class="jb-sheet-part">
+        <a href="#recipes/mine"><i class="ic ic-save"></i>My recipes</a>
+        <a href="#profile"><i class="ic ic-user"></i>Your profile</a>
+        <a href="#admin" anvil:name="sheet_admin"><i class="ic ic-shield"></i>Admin</a>
+      </div>
+      <a href="#auth" anvil:name="sheet_guest"><i class="ic ic-user"></i>Sign in or create an account</a>
+      <button type="button" anvil:on-dom:click="self.feedback_click"><i class="ic ic-chat"></i>Submit feedback</button>
+      <button type="button" data-lk-open="overview"><i class="ic ic-lock"></i>Privacy &amp; Terms</button>
+      <div class="ui-seg" role="group" aria-label="Appearance">
+        <button type="button" data-theme-set="auto" anvil:name="sheet_auto" anvil:on-dom:click="self.theme_click">Auto</button>
+        <button type="button" data-theme-set="light" anvil:name="sheet_light" anvil:on-dom:click="self.theme_click">Light</button>
+        <button type="button" data-theme-set="dark" anvil:name="sheet_dark" anvil:on-dom:click="self.theme_click">Dark</button>
+      </div>
+    </div>
+  </nav>
+</div>

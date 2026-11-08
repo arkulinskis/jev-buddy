@@ -1,0 +1,16 @@
+---
+custom_component: true
+properties:
+  - name: content
+    type: string
+    default_value: ""
+    description: HTML drawn by the Jev Buddy engine (code blocks, answer cards, tables, guide chapters)
+    default_binding_prop: true
+toolbox_item:
+  title: Engine HTML
+  group: Jev Buddy
+help_text: |
+  Shows HTML made by the JavaScript engine (window.JB in theme/assets/jb.js and jb-content.js): code blocks with
+  language tabs and Copy, answer cards, probability bars, tables, a guide chapter. Set .content.
+---
+<div class="jb-rich-host"><div class="jb-rich" anvil:dom-node="box"></div></div>
