@@ -77,7 +77,7 @@ class Shell(ShellTemplate):
             state.set_attr(self.more_link, "aria-expanded", "false")
 
     def _key(self, event):
-        if event.key == "Escape":
+        if getattr(event, "key", None) == "Escape":
             self.menu.visible = False
             self.sheet.visible = False
 

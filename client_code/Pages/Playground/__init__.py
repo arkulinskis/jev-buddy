@@ -249,7 +249,7 @@ class Playground(PlaygroundTemplate):
         self._draw_out()
 
     def _keydown(self, event):
-        if (event.ctrlKey or event.metaKey) and event.key == "Enter":
+        if (getattr(event, "ctrlKey", False) or getattr(event, "metaKey", False)) and getattr(event, "key", None) == "Enter":
             event.preventDefault()
             self.run_button_click()
 

@@ -40,7 +40,7 @@ class RecipeCard(RecipeCardTemplate):
         router.go("recipes", self.item["id"])
 
     def card_key(self, event):
-        if event.key == "Enter" and event.target == event.currentTarget:
+        if getattr(event, "key", None) == "Enter" and event.target == event.currentTarget:
             router.go("recipes", self.item["id"])
 
     @handle("like_button", "click")
