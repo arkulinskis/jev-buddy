@@ -43,7 +43,7 @@ It is an independent guide, not affiliated with TypeSafe or OpenRouter. Built on
 **For members:** save recipes from the playground (private or shared), edit their own, fork others', like, delete
 (`#recipes/mine`); live playground runs when switched on.
 
-**For admins** (`#admin`; arkulinskis@gmail.com becomes an admin on first sign-in):
+**For admins** (`#admin`; your admin email (App Secret `admin_emails`) becomes an admin on first sign-in):
 - **Overview:** members, feedback, recipes, live runs today.
 - **Feedback inbox:** New / Read / Done, private notes.
 - **Users:** search, make admin, disable an account.
@@ -60,7 +60,7 @@ It is an independent guide, not affiliated with TypeSafe or OpenRouter. Built on
 1. In the Anvil editor: **Create app → Clone from GitHub**, and paste `https://github.com/arkulinskis/jev-buddy`.
 2. **Users** service: email + password and "Continue with Google", sign-up allowed (already set in `anvil.yaml`; check it).
 3. Open the app in the editor. If it shows a **Schema Mismatch** alert, choose **"The schema of the source code is correct"** so Anvil creates the tables.
-4. **Run** it and sign up with **arkulinskis@gmail.com** straight away (that account becomes the admin).
+4. **Run** it and sign up with **your admin email** (App Secret `admin_emails`) straight away (that account becomes the admin).
 5. **Publish** (Publish → public URL, or your own domain).
 6. Optional: **Admin → Jev API**, paste an OpenRouter key and switch live runs on, so members get real Jev answers in the playground.
 
