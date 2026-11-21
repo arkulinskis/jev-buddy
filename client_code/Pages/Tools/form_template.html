@@ -69,6 +69,25 @@
 
       <div anvil:name="thr_part" class="tl-grid">
         <div class="ui-card tl-form">
+          <div class="ui-seg tl-src" role="group" aria-label="Data to use">
+            <button type="button" anvil:name="src_sample" anvil:on-dom:click="self.src_sample_click">Sample data</button>
+            <button type="button" anvil:name="src_mine" anvil:on-dom:click="self.src_mine_click">My data</button>
+          </div>
+          <div anvil:name="mine_part" class="tl-mine">
+            <p class="ui-hint tl-top0">Paste a CSV of labelled answers: <code>confidence,correct</code> (1/0, true/false, yes/no) or <code>predicted,actual,confidence</code>. Header optional; commas, semicolons or tabs. It stays in this browser: nothing is uploaded or saved.</p>
+            <label class="ui-field"><span>Your rows</span>
+              <anvil-component type="TextArea" name="csv_box" prop:placeholder="confidence,correct&#10;0.97,1&#10;0.62,0&#10;0.88,1" prop:role='["tl-csv"]'></anvil-component></label>
+            <div class="ui-row tl-mine-row">
+              <anvil-component type="Button" name="check_button" prop:text="Check" prop:role='["btn", "btn-primary", "ic-check"]'></anvil-component>
+              <anvil-component type="FileLoader" name="csv_file" prop:text="Pick a .csv" prop:file_types=".csv,.tsv,.txt,text/csv,text/plain" prop:role='["tl-file"]'></anvil-component>
+              <anvil-component type="Button" name="sample_button" prop:text="Download the sample CSV" prop:role='["btn", "btn-sm", "btn-ghost", "ic-download"]'></anvil-component>
+            </div>
+            <anvil-component type="Label" name="mine_error" prop:role='["msg-error"]' prop:visible="false"></anvil-component>
+            <anvil-component type="Label" name="mine_note" prop:role='["msg-note"]' prop:visible="false"></anvil-component>
+            <details class="tl-which"><summary>Which number do I paste?</summary>
+              <p class="small">The probability of the answer Jev picked: <i>p</i><sub>max</sub> for a choice, <i>p</i> or 1 − <i>p</i> for a noul (whichever side it picked). Jev's <code>confidence</code> field is rescaled ((<i>p</i><sub>max</sub> − 1/<i>n</i>) / (1 − 1/<i>n</i>), see the Confidence calculator), so it reads lower than the hit rate even when the probabilities are calibrated. It still works for picking thresholds; just don't read it as a hit rate. The guide's <a href="#learn/confidence/tune">tune.py</a> writes this file for you.</p>
+            </details>
+          </div>
           <label class="ui-field"><span>Act automatically above <anvil-component type="Label" name="o_auto" prop:role='["tl-o"]'></anvil-component></span>
             <input type="range" min="0.5" max="0.99" step="0.01" anvil:dom-node="r_auto"></label>
           <label class="ui-field"><span>Ask to confirm above <anvil-component type="Label" name="o_floor" prop:role='["tl-o"]'></anvil-component></span>
@@ -77,9 +96,11 @@
             <label class="ui-field"><span>A wrong automatic decision, $</span><anvil-component type="TextBox" name="t_err" prop:type="number"></anvil-component></label>
             <label class="ui-field"><span>A person reviewing one case, $</span><anvil-component type="TextBox" name="t_review" prop:type="number"></anvil-component></label>
           </fieldset>
-          <p class="ui-hint tl-flat">Synthetic data: 600 decisions where higher confidence means more often right, the way calibrated probabilities behave. Use your own labelled data for real numbers (see the guide).</p>
+          <anvil-component type="Button" name="cheap_button" prop:text="Use the cheapest thresholds" prop:role='["btn", "btn-block", "ic-target"]'></anvil-component>
+          <anvil-component type="Label" name="cheap_note" prop:role='["fine-print", "tl-cheap"]'></anvil-component>
         </div>
         <div>
+          <anvil-component type="Label" name="data_note" prop:role='["tl-data-note"]'></anvil-component>
           <div class="tl-kpis">
             <div class="ui-card tl-kpi hero"><anvil-component type="Label" name="k_auto" prop:role='["tl-big"]'></anvil-component><span>handled automatically</span></div>
             <div class="ui-card tl-kpi"><anvil-component type="Label" name="k_acc" prop:role='["tl-big"]'></anvil-component><span>accuracy of the automatic ones</span></div>
@@ -91,6 +112,18 @@
             <div class="tl-legend"><span><i class="lg-right"></i>right</span><span><i class="lg-wrong"></i>wrong</span><span>x axis: confidence</span></div>
             <anvil-component type="Jev_Buddy.Components.Rich" name="thr_table"></anvil-component>
             <p class="tl-flat"><anvil-component type="Label" name="thr_total" prop:role='["strong"]'></anvil-component> <anvil-component type="Label" name="thr_how" prop:role='["fine-print", "tl-inline"]'></anvil-component></p>
+          </div>
+          <div class="ui-card tl-calib">
+            <h3>Calibration: does 0.9 mean right 9 times in 10?</h3>
+            <div class="tl-stats">
+              <div><anvil-component type="Label" name="c_acc" prop:role='["tl-stat"]'></anvil-component><span>accuracy overall</span></div>
+              <div><anvil-component type="Label" name="c_ece" prop:role='["tl-stat"]'></anvil-component><span>ECE (average gap, lower is better)</span></div>
+              <div><anvil-component type="Label" name="c_brier" prop:role='["tl-stat"]'></anvil-component><span>Brier score (0 is perfect)</span></div>
+            </div>
+            <anvil-component type="Label" name="c_verdict" prop:role='["tl-verdict"]'></anvil-component>
+            <anvil-component type="Jev_Buddy.Components.Rich" name="calib_chart"></anvil-component>
+            <div class="tl-legend"><span><i class="lg-right"></i>how often right</span><span><i class="lg-gap"></i>over-confidence</span><span><i class="lg-diag"></i>perfect calibration</span></div>
+            <anvil-component type="Label" name="c_words" prop:role='["fine-print", "tl-words"]'></anvil-component>
           </div>
         </div>
       </div>

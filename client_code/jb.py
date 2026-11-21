@@ -7,6 +7,7 @@ sections) is HTML that Components/Rich shows. Data crosses as JSON (real Python 
     code(blocks, title), gen_blocks(req), req_json(req), answer_card(name, a), probs(p), callout(), table()
     simulate(state, questions)                 the in-browser simulator (keyword overlap, NOT Jev) -> response dict
     from_map / to_req / problems / blank       the playground's draft <-> a Jev request, with the same checks as before
+    reliability(bins, summary), pack/unpack(value), search(q)   calibration chart, share links, the search palette
 """
 import json
 import re
@@ -284,3 +285,31 @@ def state_kind(text):
         except ValueError:
             return "looks like JSON but doesn't parse: sent as text"
     return "text · ~%d tokens" % tokens(st)
+
+
+# ---------------------------------------------------------------- calibration chart, share links, search
+def reliability(bins, summary):
+    """The reliability chart (inline SVG) for Tools -> Threshold simulator; bins from calib.stats()."""
+    return str(J().reliability(to_js(bins), summary))
+
+
+def pack(value):
+    """A value -> a short URL-safe code (JSON -> UTF-8 -> base64url) for #playground/s/<code>; None on error."""
+    code = J().pack(json.dumps(value))
+    return str(code) if code else None
+
+
+def unpack(code):
+    """The value packed by pack(), or None when the code is broken."""
+    text = J().unpack(code or "")
+    if not text:
+        return None
+    try:
+        return json.loads(str(text))
+    except ValueError:
+        return None
+
+
+def search(query, limit=12):
+    """Search palette hits: [{kind, title, snippet (HTML), go, icon}] (JB.search in jb-content.js)."""
+    return json.loads(str(J().search(query or "", limit)))

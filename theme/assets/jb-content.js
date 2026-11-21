@@ -21,6 +21,21 @@
   var ASK_PY = 'import os\nimport requests\n\nURL = "https://openrouter.ai/api/alpha/decisions"\nHEADERS = {"Authorization": f"Bearer {os.environ[\'OPENROUTER_API_KEY\']}"}\n\n\ndef ask(state, questions, model="typesafe/jev-1.13"):\n    """Send state + questions to Jev. Returns (answers, cost_in_usd)."""\n    r = requests.post(URL, headers=HEADERS, timeout=15,\n                      json={"model": model, "state": state, "questions": questions})\n    r.raise_for_status()\n    data = r.json()\n    return data["answers"], data["usage"].get("cost", 0)';
   var ASK_TS = 'type Answers = Record<string, any>;\n\nexport async function ask(state: unknown, questions: Record<string, unknown>, model = "typesafe/jev-1.13") {\n  const res = await fetch("https://openrouter.ai/api/alpha/decisions", {\n    method: "POST",\n    headers: {\n      Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,\n      "Content-Type": "application/json",\n    },\n    body: JSON.stringify({ model, state, questions }),\n  });\n  if (!res.ok) throw new Error(`Jev ${res.status}: ${await res.text()}`);\n  const data = await res.json();\n  return { answers: data.answers as Answers, cost: data.usage?.cost ?? 0 };\n}';
 
+  /* The Gotchas chapter's table; the search palette (JB.search) finds them too. */
+  JB.GOTCHAS = [
+    ['400 from chat/completions', 'Jev is a decisions model. Use <code>/api/alpha/decisions</code> on OpenRouter, not the chat endpoint. Model lists filtered to chat models won\'t show it; filter by decisions output.'],
+    ['"null" vs <code>noul</code>', 'The yes/no type is spelled <code>noul</code>.'],
+    ['Score isn\'t 0 to 1', 'It runs from 0 to levels − 1 (0 to 2 with three levels).'],
+    ['Score probabilities are keyed by index', '<code>"0"</code>, <code>"1"</code>, … Map back with <code>legend</code>.'],
+    ['Noul has no confidence', 'The field is absent. Don\'t default it to 0; use <code>|2p − 1|</code> if you need one.'],
+    ['0.5 isn\'t "medium"', 'For a noul, 0.5 means unsure. Use a score for degrees.'],
+    ['Jev always answers', 'Add <code>other</code>/<code>unclear</code> options and check confidence.'],
+    ['Questions can\'t see each other', 'Dependent questions need two calls or logic in code.'],
+    ['Option order matters a little', 'Keep a fixed order; don\'t shuffle.'],
+    ['Numbers vary slightly between runs', 'Test decisions, not exact probabilities.'],
+    ['Unpinned models move', 'Thresholds tuned on one snapshot may drift on the next. Pin when tuning; log <code>model</code>.'],
+    ['API key in the browser', 'Calls are billed to you. Proxy through your server.']];
+
   var CH = [
     /* ================================================================ START */
     { id: 'what-is-jev', group: 'Start here', icon: 'bulb', mins: 4, title: 'What is Jev?', blurb: 'A model that decides instead of writing. How it differs from an LLM, and when to use it.',
@@ -216,8 +231,8 @@
           '<h2 id="risk">Scale thresholds with risk</h2><p>TypeSafe\'s guidance: a floor (e.g. 0.5) below which nothing happens automatically, no confirmation for read-only actions, and a high bar (above 0.9) for high-stakes actions such as approving a transfer. The right numbers depend on what a mistake costs you.</p>' +
           code({ lang: 'python', label: 'gate.py', code: 'THRESHOLDS = {            # per action, from the cost of a wrong call\n    "tag_ticket":     0.50,  # cheap to fix\n    "send_reply":     0.80,\n    "issue_refund":   0.92,  # money leaves the building\n}\n\ndef decide(action: str, confidence: float) -> str:\n    t = THRESHOLDS[action]\n    if confidence >= t:\n        return "auto"\n    if confidence >= max(0.5, t - 0.25):\n        return "confirm"\n    return "human"' }) +
           '<h2 id="tune">Tune thresholds on your own data</h2><p>Label a few hundred real examples, run them through Jev once, then pick the lowest threshold that meets the accuracy you need:</p>' +
-          code({ lang: 'python', label: 'tune.py', code: 'import csv\nfrom jev import ask\n\nrows = list(csv.DictReader(open("labelled_tickets.csv")))   # columns: text, team\nresults = []\nfor r in rows:\n    a, _ = ask(r["text"], {"team": TEAM_QUESTION})\n    results.append((a["team"]["confidence"], a["team"]["choice"] == r["team"]))\n\nfor t in [0.5, 0.6, 0.7, 0.8, 0.9]:\n    auto = [ok for c, ok in results if c >= t]\n    if auto:\n        print(f"threshold {t:.1f}: automates {len(auto)/len(results):.0%}, "\n              f"accuracy on those {sum(auto)/len(auto):.1%}")' }) +
-          co('Try it without code: the ' + link('tools/thresholds', 'threshold simulator') + ' shows how many decisions you automate and how many mistakes slip through at each threshold.', 'good', 'gauge') +
+          code({ lang: 'python', label: 'tune.py', code: 'import csv\nfrom jev import ask\n\nrows = list(csv.DictReader(open("labelled_tickets.csv")))   # columns: text, team\nresults, calib = [], []\nfor r in rows:\n    a, _ = ask(r["text"], {"team": TEAM_QUESTION})\n    t = a["team"]\n    results.append((t["confidence"], t["choice"] == r["team"]))\n    calib.append((t["probabilities"][t["choice"]], int(t["choice"] == r["team"])))\n\nfor t in [0.5, 0.6, 0.7, 0.8, 0.9]:\n    auto = [ok for c, ok in results if c >= t]\n    if auto:\n        print(f"threshold {t:.1f}: automates {len(auto)/len(results):.0%}, "\n              f"accuracy on those {sum(auto)/len(auto):.1%}")\n\n# p_max per row, for the calibration check in Jev Buddy (Tools > Threshold simulator > My data)\nwith open("calibration.csv", "w", newline="") as f:\n    csv.writer(f).writerows([("confidence", "correct")] + calib)' }) +
+          co('Try it without code: the ' + link('tools/thresholds', 'threshold simulator') + ' shows how many decisions you automate and how many mistakes slip through at each threshold. Its <b>' + link('tools/thresholds/mine', 'My data') + '</b> mode reads the <code>calibration.csv</code> above (or any <code>confidence,correct</code> file) and draws a reliability chart with ECE, Brier score and the cheapest thresholds. The rows stay in your browser.', 'good', 'gauge') +
           '<h2 id="other">Other measures</h2><ul><li><b>Top probability</b> (<i>p</i><sub>max</sub>): easy to read, but 0.5 means something different with 2 options than with 10, so set it per question.</li>' +
           '<li><b>Top-to-second ratio</b> (<i>p</i><sub>max</sub> / <i>p</i><sub>second</sub>): how clearly the winner beats the runner-up.</li>' +
           '<li><b>Calibration is measured across many answers,</b> not guaranteed for any single one. Keep humans on the decisions that matter.</li></ul>' +
@@ -321,19 +336,7 @@
 
     { id: 'gotchas', group: 'Reference', icon: 'alert', mins: 4, title: 'Gotchas', blurb: 'The twelve mistakes people make in their first week with Jev.',
       body: function () {
-        var G = [
-          ['400 from chat/completions', 'Jev is a decisions model. Use <code>/api/alpha/decisions</code> on OpenRouter, not the chat endpoint. Model lists filtered to chat models won\'t show it; filter by decisions output.'],
-          ['"null" vs <code>noul</code>', 'The yes/no type is spelled <code>noul</code>.'],
-          ['Score isn\'t 0 to 1', 'It runs from 0 to levels − 1 (0 to 2 with three levels).'],
-          ['Score probabilities are keyed by index', '<code>"0"</code>, <code>"1"</code>, … Map back with <code>legend</code>.'],
-          ['Noul has no confidence', 'The field is absent. Don\'t default it to 0; use <code>|2p − 1|</code> if you need one.'],
-          ['0.5 isn\'t "medium"', 'For a noul, 0.5 means unsure. Use a score for degrees.'],
-          ['Jev always answers', 'Add <code>other</code>/<code>unclear</code> options and check confidence.'],
-          ['Questions can\'t see each other', 'Dependent questions need two calls or logic in code.'],
-          ['Option order matters a little', 'Keep a fixed order; don\'t shuffle.'],
-          ['Numbers vary slightly between runs', 'Test decisions, not exact probabilities.'],
-          ['Unpinned models move', 'Thresholds tuned on one snapshot may drift on the next. Pin when tuning; log <code>model</code>.'],
-          ['API key in the browser', 'Calls are billed to you. Proxy through your server.']];
+        var G = JB.GOTCHAS;
         return '<p class="lead">Each of these has bitten someone. Read them once and save yourself an afternoon.</p>' +
           JB.table(['#', 'Gotcha', 'Fix'], G.map(function (g, i) { return ['<span class="mono">' + (i + 1) + '</span>', '<b>' + g[0] + '</b>', g[1]]; })) +
           co('Spotted another one? Tell us with <a href="#" data-feedback="idea">Submit feedback</a> and we\'ll add it.', '', 'chat');
@@ -666,5 +669,155 @@
   JB.hero = function (el) {
     el.innerHTML = heroArt();
     return animate(el);
+  };
+})();
+
+/* JB.search(q, n): the search palette (Ctrl/Cmd+K or "/", Dialogs/Search). Everything is searched in the browser:
+   the guide's chapters (and their sections, so a hit can open #learn/<chapter>/<section>), the Gotchas table
+   (JB.GOTCHAS), error codes (JB.ERRORS, each fix as the guide states it), the use cases (JB.EXAMPLES), the Open source
+   page's sections and the tools. Returns JSON: [{kind, title, snippet (HTML, matches in <mark>), go, icon}].
+   Scoring: every word must match (prefix match; numbers match whole); title hits weigh most, a phrase bonus, error
+   codes first when you type a number. The index is built once, on the first search. */
+(function () {
+  'use strict';
+  var esc = UI.esc;
+
+  /* Error codes and their fixes, as the guide states them (Going to production, Gotchas, Your first call). */
+  JB.ERRORS = [
+    ['400', 'Bad request', 'Fix the request; retrying won\'t help. The classic cause: sending typesafe/jev-1.13 to /chat/completions. Jev is not a chat model: call /api/alpha/decisions on OpenRouter.', 'learn/gotchas'],
+    ['402', 'Payment required', 'Add credits to your account. Don\'t retry a 402.', 'learn/production/checklist'],
+    ['429', 'Too many requests', 'Retry with exponential backoff (0.5 s, 1 s, 2 s) and keep a bounded number of requests in flight: the guide\'s batch code allows 20 at once.', 'learn/production/async'],
+    ['500 502 503', 'Server errors (5xx)', 'Retry with exponential backoff, a few tries, the same way as a 429.', 'learn/production/async'],
+    ['524 529', 'Retry these too', 'The guide\'s batch code retries 524 and 529 with the same exponential backoff as 429 and 5xx.', 'learn/production/async']
+  ];
+
+  var PAGES = [
+    ['Tool', 'Check my data (calibration)', 'Paste or pick a CSV of labelled answers (confidence, correct) and get a reliability chart, accuracy, ECE, Brier score and the cheapest thresholds. Calibration on your own data, in your browser.', 'tools/thresholds/mine', 'target'],
+    ['Tool', 'Threshold simulator', 'Act automatically above, ask to confirm above, a person below. How many decisions you automate, mistakes per 10k and the total cost.', 'tools/thresholds', 'gauge'],
+    ['Tool', 'Cost calculator', 'What Jev costs per month at your volume against an LLM returning JSON: input tokens, output tokens, retries, price per million tokens.', 'tools/cost', 'calc'],
+    ['Tool', 'Confidence calculator', 'How confidence is computed for choice, score and noul, with the formulas worked through.', 'tools/confidence', 'target'],
+    ['Page', 'Playground', 'Build a request (state plus choice, noul and score questions), run it, see the request JSON and code. Share a link or a "Try it in Jev Buddy" README badge.', 'playground', 'play'],
+    ['Page', 'Recipes', 'Saved requests from the community: browse, like, fork and open them in the playground.', 'recipes', 'users'],
+    ['Page', 'Open source alternatives', 'Run decisions on your own machine: Laya, Ollaya, Kev, jevos and more, with install steps.', 'opensource', 'unlock']
+  ];
+  var POPULAR = ['learn/quickstart', 'learn/gotchas', 'tools/thresholds/mine', 'learn/confidence', 'opensource/laya', 'tools/cost'];
+
+  function text(html) {
+    return String(html || '').replace(/<(script|style)[\s\S]*?<\/\1>/gi, ' ').replace(/<\/?(p|div|li|ul|ol|h[1-6]|td|th|tr|table|pre|br|section|details|summary)\b[^>]*>/gi, ' ').replace(/<[^>]+>/g, '')
+      .replace(/&nbsp;/g, ' ').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, '\'').replace(/&amp;/g, '&')
+      .replace(/\s+/g, ' ').trim();
+  }
+
+  var DOCS = null;
+  function add(kind, title, body, go, icon) {
+    DOCS.push({ kind: kind, title: title, text: body, go: go, icon: icon || 'book', tl: title.toLowerCase(), xl: body.toLowerCase() });
+  }
+  function build() {
+    DOCS = [];
+    PAGES.forEach(function (p) { add(p[0], p[1], p[2], p[3], p[4]); });
+    JB.ERRORS.forEach(function (e) {
+      add('Error fix', e[0].split(' ').join(', ') + ': ' + e[1], e[2], e[3], 'alert');
+    });
+    (JB.GOTCHAS || []).forEach(function (g) { add('Gotcha', text(g[0]), text(g[1]), 'learn/gotchas', 'alert'); });
+    (JB.CHAPTERS || []).forEach(function (c) {
+      var html = '';
+      try { html = c.body(); } catch (e) { html = ''; }
+      var parts = html.split(/<h2 id="([^"]+)">([\s\S]*?)<\/h2>/);
+      add('Chapter', c.title, c.blurb + ' ' + text(parts[0]), 'learn/' + c.id, c.icon);
+      for (var i = 1; i + 2 < parts.length; i += 3) {
+        add('Chapter', c.title + ' › ' + text(parts[i + 1]), text(parts[i + 2]), 'learn/' + c.id + '/' + parts[i], c.icon);
+      }
+    });
+    (JB.EXAMPLES || []).forEach(function (e) {
+      add('Use case', e.title, [e.tagline, e.who, e.problem, e.before, (e.steps || []).join(' '), (e.tips || []).join(' '), Object.keys(e.questions || {}).join(' ')].join(' '),
+        'examples/' + e.slug, e.icon);
+    });
+    if (JB.OS) {
+      var os = '';
+      try { os = JB.OS.switchHtml() + JB.OS.restHtml(); } catch (e) { os = ''; }
+      var re = /<section[^>]*id="os-([a-z0-9-]+)"[^>]*>([\s\S]*?)<\/section>/g, m;
+      while ((m = re.exec(os))) {
+        var h = /<h2>([\s\S]*?)<\/h2>/.exec(m[2]);
+        add('Open source', 'Open source › ' + (h ? text(h[1]) : m[1]), text(h ? m[2].slice(h.index + h[0].length) : m[2]), 'opensource/' + m[1], 'unlock');
+      }
+    }
+  }
+
+  function rx(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+  function termRe(t) {
+    if (/^\d+$/.test(t)) return new RegExp('(^|[^0-9])' + t + '(?![0-9])');
+    return new RegExp('(^|[^a-z0-9_])' + rx(t) + (t.length < 2 ? '(?![a-z0-9_])' : ''));
+  }
+  function count(re, s) {
+    var g = new RegExp(re.source, 'g'), n = 0;
+    while (g.exec(s) && n < 5) n++;
+    return n;
+  }
+  function snippet(d, res) {
+    var s = d.text, at = -1;
+    for (var i = 0; i < res.length && at < 0; i++) {
+      var m = res[i].exec(d.xl);
+      if (m) at = m.index + m[1].length;
+    }
+    var from = 0, to = Math.min(s.length, 170);
+    if (at > 60) {
+      from = s.lastIndexOf(' ', at - 50);
+      from = from < 0 ? 0 : from + 1;
+      to = Math.min(s.length, from + 170);
+    }
+    if (to < s.length) { var sp = s.lastIndexOf(' ', to); if (sp > from + 80) to = sp; }
+    var raw = s.slice(from, to), low = raw.toLowerCase(), marks = [];
+    res.forEach(function (r) {
+      var g = new RegExp(r.source, 'g'), m;
+      while ((m = g.exec(low))) {
+        var st = m.index + m[1].length, en = st;
+        while (en < low.length && /[a-z0-9_]/.test(low[en])) en++;
+        if (en > st) marks.push([st, en]);
+        if (g.lastIndex === m.index) g.lastIndex++;
+      }
+    });
+    marks.sort(function (x, y) { return x[0] - y[0]; });
+    var out = '', last = 0;
+    marks.forEach(function (mk) {
+      if (mk[0] < last) return;
+      out += esc(raw.slice(last, mk[0])) + '<mark>' + esc(raw.slice(mk[0], mk[1])) + '</mark>';
+      last = mk[1];
+    });
+    out += esc(raw.slice(last));
+    return (from > 0 ? '… ' : '') + out + (to < s.length ? ' …' : '');
+  }
+  function hit(d, html) {
+    return { kind: d.kind, title: d.title, snippet: html, go: d.go, icon: d.icon };
+  }
+
+  JB.search = function (q, n) {
+    if (!DOCS) build();
+    n = n || 12;
+    q = String(q || '').toLowerCase().trim();
+    var terms = (q.match(/[a-z0-9_]+/g) || []).filter(function (t, i, a) { return a.indexOf(t) === i; }).slice(0, 8);
+    if (!terms.length) {
+      return JSON.stringify(POPULAR.map(function (go) {
+        var d = DOCS.filter(function (x) { return x.go === go; })[0];
+        return d ? hit(d, esc(d.text.slice(0, 150)) + (d.text.length > 150 ? ' …' : '')) : null;
+      }).filter(Boolean));
+    }
+    var res = terms.map(termRe), phrase = terms.length > 1 ? q.replace(/\s+/g, ' ') : '';
+    var numeric = terms.some(function (t) { return /^\d+$/.test(t); });
+    var scored = [];
+    DOCS.forEach(function (d) {
+      var score = 0;
+      for (var i = 0; i < res.length; i++) {
+        var inTitle = res[i].test(d.tl), inText = count(res[i], d.xl);
+        if (!inTitle && !inText) return;
+        score += (inTitle ? 10 : 0) + inText * 1.5;
+      }
+      if (phrase) score += (d.tl.indexOf(phrase) >= 0 ? 15 : 0) + (d.xl.indexOf(phrase) >= 0 ? 6 : 0);
+      if (numeric && d.kind === 'Error fix') score += 12;
+      if (d.kind === 'Gotcha') score += 2;
+      if (d.go.split('/').length <= 2) score += 1;  // whole pages before their sections, all else equal
+      scored.push([score, d]);
+    });
+    scored.sort(function (a, b) { return b[0] - a[0] || a[1].title.length - b[1].title.length; });
+    return JSON.stringify(scored.slice(0, n).map(function (x) { return hit(x[1], snippet(x[1], res)); }));
   };
 })();

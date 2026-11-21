@@ -2,10 +2,11 @@ import math
 
 from anvil import *
 import anvil.js
+import anvil.media
 from anvil.js import window
 
 from ._anvil_designer import ToolsTemplate
-from ... import jb, router, state
+from ... import calib, jb, router, state
 
 TABS = ["cost", "confidence", "thresholds"]
 COST_DEFAULT = {"volume": 100000, "tokens": 250, "questions": 3, "llmIn": 0.10, "llmOut": 0.50, "outPerQ": 40, "overhead": 120, "retry": 3}
@@ -45,14 +46,16 @@ def synthetic():
 
     for _ in range(600):
         c = min(0.999, rnd() ** 0.45)
-        data.append((c, rnd() < 0.3 + 0.69 * c))
+        data.append((r3(c), rnd() < 0.3 + 0.69 * c))  # 3 decimals, as the sample CSV writes them
     return data
 
 
 class Tools(ToolsTemplate):
     """#tools/cost[/volume/tokens/questions]: Jev's monthly cost against an LLM returning JSON (store 'cost').
     #tools/confidence: how confidence is computed for choice, score and noul (TypeSafe's formulas, JB.conf*).
-    #tools/thresholds: the threshold simulator on 600 synthetic decisions (store 'thr'). All in the browser."""
+    #tools/thresholds[/mine]: the threshold simulator on 600 synthetic decisions (store 'thr'), or on the visitor's own
+    labelled rows ("My data": pasted or picked CSV -> calib.py -> reliability chart, ECE, Brier, cheapest thresholds).
+    All in the browser: the rows are never stored or sent."""
 
     def __init__(self, args=(), **properties):
         super().__init__(**properties)
@@ -217,8 +220,13 @@ class Tools(ToolsTemplate):
         self.conf_out.content = html
 
     # ================================================================ thresholds
+    # Two data sources: the 600-decision sample, or "My data" (rows pasted or picked as CSV, parsed by calib.py).
+    # The rows live only in this page (self.mine): never in store 'thr', never sent to the server.
     def _thr_setup(self):
-        self.data = synthetic()
+        self.sample = synthetic()
+        self.mine: list = []
+        self.mine_info: dict = {}
+        self.src = "mine" if len(self.args) > 1 and self.args[1] == "mine" else "sample"
         v = dict(THR_DEFAULT)
         v.update(jb.store_get("thr", {}) or {})
         self.dom_nodes["r_auto"].value = str(v["auto"])
@@ -229,51 +237,180 @@ class Tools(ToolsTemplate):
         state.set_control_attr(self.t_err, "min", 0)
         state.set_control_attr(self.t_review, "min", 0)
         state.set_control_attr(self.t_review, "step", 0.1)
+        state.set_control_attr(self.csv_box, "spellcheck", "false")
+        state.set_control_attr(self.csv_box, "data-no-keep", "1")  # session_guard never copies these rows anywhere
         calc = anvil.js.report_exceptions(lambda e: self._thr_calc())
         self.dom_nodes["r_auto"].addEventListener("input", calc)
         self.dom_nodes["r_floor"].addEventListener("input", calc)
         self.t_err.add_event_handler("change", lambda **e: self._thr_calc())
         self.t_review.add_event_handler("change", lambda **e: self._thr_calc())
+        self._use_data()
+
+    def _use_data(self):
+        """Point the simulator at the sample or at the checked rows, and redraw everything that depends on them."""
+        mine = self.src == "mine"
+        self.src_sample.classes["on"] = not mine
+        self.src_mine.classes["on"] = mine
+        self.mine_part.visible = mine
+        rows = self.mine if mine and self.mine else self.sample
+        self.data = rows
+        self.prep = calib.prefix(rows)
+        self.hist = self._bins(rows)
+        if mine and self.mine:
+            info = self.mine_info
+            skipped = info.get("skipped") or 0
+            self.data_note.text = "Your data: %s rows (%s)%s. Only in this browser." % (
+                jb.thousands(len(rows)), info.get("fmt", ""),
+                ", %d line%s skipped" % (skipped, "" if skipped == 1 else "s") if skipped else "")
+        elif mine:
+            self.data_note.text = "My data: nothing checked yet, so the numbers below are still the sample."
+        else:
+            self.data_note.text = ("Sample data: 600 synthetic decisions where higher confidence means more often right. "
+                                   "Switch to My data to check your own labelled answers.")
+        self._calib_draw()
         self._thr_calc()
 
-    def _thr_calc(self):
+    def src_sample_click(self, event):
+        self.src = "sample"
+        router.replace("tools", "thresholds")
+        self._use_data()
+
+    def src_mine_click(self, event):
+        self.src = "mine"
+        router.replace("tools", "thresholds", "mine")
+        self._use_data()
+        if not self.mine:
+            state.focus(self.csv_box)
+
+    def _thr_values(self):
         auto_t = float(self.dom_nodes["r_auto"].value)
-        v = {"auto": auto_t, "floor": min(float(self.dom_nodes["r_floor"].value), auto_t),
-             "errCost": number(self.t_err), "reviewCost": number(self.t_review)}
-        jb.store_set("thr", v)
+        return {"auto": auto_t, "floor": min(float(self.dom_nodes["r_floor"].value), auto_t),
+                "errCost": number(self.t_err), "reviewCost": number(self.t_review)}
+
+    def _thr_calc(self):
+        v = self._thr_values()
+        jb.store_set("thr", v)  # slider and cost values only: never the rows
         self.o_auto.text = "%.2f" % v["auto"]
         self.o_floor.text = "%.2f" % v["floor"]
-        data, total = self.data, float(len(self.data))
-        auto = [d for d in data if d[0] >= v["auto"]]
-        conf = [d for d in data if v["floor"] <= d[0] < v["auto"]]
-        human = len(data) - len(auto) - len(conf)
-        wrong = len([d for d in auto if not d[1]])
-        acc = 1 - wrong * 1.0 / len(auto) if auto else 0
+        p = self.prep
+        total = float(p["n"])
+        ak, fk = calib.step(v["auto"]), calib.step(v["floor"])
+        auto, wrong = p["ge"][ak], p["wrong_ge"][ak]
+        conf = p["ge"][fk] - auto
+        human = p["n"] - p["ge"][fk]
+        acc = 1 - wrong * 1.0 / auto if auto else 0
 
         def per10k(n):
             return int(math.floor(n / total * 10000 + 0.5))
 
-        cost_total = (wrong * v["errCost"] + (len(conf) + human) * v["reviewCost"]) / total * 10000
-        self.k_auto.text = jb.pct(len(auto) / total)
+        cost_total = calib.cost_per_10k(p, ak, v["errCost"], v["reviewCost"])
+        self.k_auto.text = jb.pct(auto / total)
         self.k_acc.text = "%.1f%%" % (acc * 100) if auto else "–"
         self.k_wrong.text = str(per10k(wrong))
         self.thr_chart.content = self._histogram(v)
         self.thr_table.content = jb.table(["Route", "Share", "Per 10k decisions"], [
-            ['<span class="jb-conf hi">Automatic</span>', jb.pct(len(auto) / total), per10k(len(auto))],
-            ['<span class="jb-conf mid">Confirm</span>', jb.pct(len(conf) / total), per10k(len(conf))],
+            ['<span class="jb-conf hi">Automatic</span>', jb.pct(auto / total), per10k(auto)],
+            ['<span class="jb-conf mid">Confirm</span>', jb.pct(conf / total), per10k(conf)],
             ['<span class="jb-conf lo">Human</span>', jb.pct(human / total), per10k(human)]])
         self.thr_total.text = "Total cost per 10k decisions: " + jb.money(cost_total)
         self.thr_how.text = "(mistakes × $%s + reviews × $%s; Jev itself adds about %s)" % (
             jb.n(v["errCost"]), jb.n(v["reviewCost"]), jb.money(10000 * 250 * jb.PRICE_PER_M / 1e6))
+        best = calib.cheapest(self.data, v["errCost"], v["reviewCost"], self.prep)
+        same = calib.step(best["auto"]) == ak and calib.step(best["floor"]) == fk
+        cheaper = best["cost"] < cost_total - 0.005
+        if same or not cheaper:
+            self.cheap_note.text = "Your automatic threshold is already the cheapest for this data and these costs."
+        else:
+            self.cheap_note.text = ("Cheapest for this data: act above %.2f and confirm above %.2f, %s per 10k decisions "
+                                    "instead of %s. The confirm line follows the guide's rule (act line − 0.25, at least 0.5)."
+                                    % (best["auto"], best["floor"], jb.money(best["cost"]), jb.money(cost_total)))
+        self.cheap_button.enabled = not same and cheaper
+
+    @handle("cheap_button", "click")
+    def cheap_button_click(self, **event_args):
+        v = self._thr_values()
+        best = calib.cheapest(self.data, v["errCost"], v["reviewCost"], self.prep)
+        self.dom_nodes["r_auto"].value = str(best["auto"])
+        self.dom_nodes["r_floor"].value = str(best["floor"])
+        self._thr_calc()
+        state.toast("Thresholds set: act above %.2f, confirm above %.2f." % (best["auto"], best["floor"]), "ok")
+        getattr(self.dom_nodes["r_auto"], "focus")()
+
+    # ---- my data
+    @handle("check_button", "click")
+    def check_button_click(self, **event_args):
+        self._check(self.csv_box.text or "")
+
+    @handle("csv_file", "change")
+    def csv_file_change(self, file, **event_args):
+        if file is None:
+            return
+        text = None
+        try:
+            raw = file.get_bytes()
+            if len(raw) > 3 * 1024 * 1024:
+                self._mine_msg("That file is over 3 MB. Only 20,000 rows are used, so trim it first.", None)
+            else:
+                text = raw.decode("utf-8", "replace") if isinstance(raw, bytes) else str(raw)
+        except Exception:
+            self._mine_msg("That file couldn't be read. Is it a plain-text .csv?", None)
+        self.csv_file.clear()
+        if text is not None:
+            self.csv_box.text = text
+            self._check(text)
+
+    def _mine_msg(self, error, note):
+        self.mine_error.visible = bool(error)
+        self.mine_error.text = error or ""
+        self.mine_note.visible = bool(note)
+        self.mine_note.text = note or ""
+
+    def _check(self, text):
+        res = calib.parse(text)
+        skipped = res["skipped"]
+        lines = "%d line%s skipped" % (skipped, "" if skipped == 1 else "s")
+        if res["error"]:
+            self._mine_msg(res["error"] + (" (" + lines + ": not numbers, or no right/wrong value.)" if skipped else ""), None)
+            return
+        self.mine = res["rows"]
+        self.mine_info = {"fmt": res["fmt"], "skipped": skipped}
+        notes = ["Checked %s rows as %s." % (jb.thousands(res["used"]), res["fmt"])]
+        if skipped:
+            notes.append(lines + " (not numbers, or no right/wrong value).")
+        self._mine_msg(None, " ".join(notes + res["notes"]))
+        self._use_data()
+
+    @handle("sample_button", "click")
+    def sample_button_click(self, **event_args):
+        text = calib.sample_csv(self.sample)
+        anvil.media.download(BlobMedia("text/csv", text.encode("utf-8"), name="jev-buddy-sample.csv"))
+
+    # ---- drawing
+    def _calib_draw(self):
+        st = calib.stats(self.data)
+        if not st:
+            return
+        self.c_acc.text = "%.1f%%" % (st["accuracy"] * 100)
+        self.c_ece.text = "%.3f" % st["ece"]
+        self.c_brier.text = "%.3f" % st["brier"]
+        self.c_verdict.text = calib.verdict(st)
+        self.c_words.text = calib.ece_words(st["ece"]) + " (A rule of thumb used here, not a standard.)"
+        self.calib_chart.content = jb.reliability(st["bins"], "Reliability chart. " + calib.verdict(st)
+                                                  + " ECE %.3f." % st["ece"])
+
+    def _bins(self, rows):
+        bins = 20
+        hist = [[0, 0] for _ in range(bins)]
+        for c, ok in rows:
+            hist[min(bins - 1, int(math.floor(c * bins)))][0 if ok else 1] += 1
+        return hist
 
     def _histogram(self, v):
         """The confidence histogram (right / wrong per bin) with the two threshold lines, as SVG."""
-        bins, W, H, pad = 20, 600, 190, 24
+        hist, W, H, pad = self.hist, 600, 190, 24
+        bins = len(hist)
         bw = (W - pad * 2) / float(bins)
-        hist = [[0, 0] for _ in range(bins)]
-        for c, ok in self.data:
-            hist[min(bins - 1, int(math.floor(c * bins)))][0 if ok else 1] += 1
-        mx = max(h[0] + h[1] for h in hist)
+        mx = max(h[0] + h[1] for h in hist) or 1
         parts = []
         for k, (ok, bad) in enumerate(hist):
             x = pad + k * bw

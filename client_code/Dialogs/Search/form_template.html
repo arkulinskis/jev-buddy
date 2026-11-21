@@ -1,0 +1,19 @@
+<div class="ui sr-dialog">
+  <h2 class="ui-sr" id="sr-title">Search Jev Buddy</h2>
+  <div class="sr-box">
+    <i class="ic ic-search" aria-hidden="true"></i>
+    <anvil-component type="TextBox" name="q_box" prop:placeholder="Search the guide, use cases, errors (try 429)" prop:role='["sr-input"]'></anvil-component>
+    <kbd class="sr-kbd">Esc</kbd>
+  </div>
+  <anvil-component type="Label" name="hint" prop:role='["sr-hint"]'></anvil-component>
+  <div class="sr-list" anvil:dom-node="list" id="sr-list" role="listbox" aria-label="Search results">
+    <anvil-component type="RepeatingPanel" name="results" prop:item_template="Jev_Buddy.Items.SearchHit" prop:role='["sr-panel"]'></anvil-component>
+  </div>
+  <div class="sr-empty" anvil:name="empty">
+    <i class="ic ic-search" aria-hidden="true"></i>
+    <anvil-component type="Label" name="empty_text" prop:role='["sr-empty-t"]'></anvil-component>
+    <p class="small muted">Try fewer words, an error code like <code>429</code>, or a question type: <code>choice</code>, <code>noul</code>, <code>score</code>.</p>
+    <anvil-component type="Button" name="feedback_button" prop:text="Submit feedback: tell us what's missing" prop:role='["btn", "btn-sm", "ic-chat"]'></anvil-component>
+  </div>
+  <p class="sr-foot small muted" aria-hidden="true"><kbd>↑</kbd><kbd>↓</kbd> move <kbd>Enter</kbd> open <kbd>Esc</kbd> close</p>
+</div>

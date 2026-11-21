@@ -24,7 +24,7 @@ LOOP_MS = 30 * 1000       # an expiry this soon after our own reload is shown, n
 DRAFT_MS = 3 * 60 * 1000  # saved field values older than this are thrown away
 REPORT_MAX = 10           # uncaught errors reported to the server's error_log per page load
 KEY = "anvil.session_guard"
-FIELDS = "input, textarea, select"
+FIELDS = "input:not([data-no-keep]), textarea:not([data-no-keep]), select"  # data-no-keep: private text (Tools -> My data)
 SKIP_TYPES = ("password", "file", "hidden", "submit", "button", "reset", "image")
 _s: dict = {"on": False, "reloading": False, "away_since": 0, "last_touch": 0, "checking": False}
 

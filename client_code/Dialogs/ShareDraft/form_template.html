@@ -1,0 +1,33 @@
+<div class="ui sh-dialog">
+  <anvil-component type="Label" name="heading" prop:text="Share this request" prop:role='["dlg-title"]'></anvil-component>
+  <anvil-component type="Label" name="intro" prop:role='["fine-print", "sh-intro"]'></anvil-component>
+  <div anvil:name="long_part" class="ui-stack">
+    <anvil-component type="Label" name="long_msg" prop:role='["msg-note"]'></anvil-component>
+    <div class="ui-row end">
+      <anvil-component type="Button" name="long_close" prop:text="Close" prop:role='["btn", "btn-ghost"]'></anvil-component>
+      <anvil-component type="Button" name="long_save" prop:text="Save as a recipe" prop:role='["btn", "btn-primary", "ic-save"]'></anvil-component>
+    </div>
+  </div>
+  <div anvil:name="link_part" class="ui-stack">
+    <label class="ui-field"><span>Link</span>
+      <span class="sh-copy-row">
+        <anvil-component type="TextBox" name="link_box" prop:role='["sh-mono"]'></anvil-component>
+        <anvil-component type="Button" name="copy_link" prop:text="Copy" prop:role='["btn", "btn-primary", "ic-copy"]'></anvil-component>
+      </span></label>
+    <anvil-component type="Label" name="problems_note" prop:role='["fine-print"]' prop:visible="false"></anvil-component>
+    <div class="sh-badge">
+      <div class="sh-badge-head"><b>README badge</b>
+        <span class="muted small">For a GitHub README, an issue or docs: the badge opens this request.</span></div>
+      <a anvil:dom-node="badge_link" class="sh-badge-preview" target="_blank" rel="noopener"><img src="_/theme/badge.svg" alt="Try it in Jev Buddy" width="146" height="20"></a>
+      <label class="ui-field"><span>Markdown</span>
+        <anvil-component type="TextArea" name="md_box" prop:role='["sh-mono", "sh-md"]'></anvil-component></label>
+      <div class="ui-row">
+        <anvil-component type="Button" name="copy_md" prop:text="Copy Markdown" prop:role='["btn", "btn-sm", "ic-copy"]'></anvil-component>
+        <anvil-component type="Button" name="copy_html" prop:text="Copy HTML" prop:role='["btn", "btn-sm", "btn-ghost", "ic-code"]'></anvil-component>
+      </div>
+    </div>
+    <div class="ui-row end">
+      <anvil-component type="Button" name="close_button" prop:text="Done" prop:role='["btn"]'></anvil-component>
+    </div>
+  </div>
+</div>

@@ -13,6 +13,7 @@ THEMES = ["auto", "light", "dark"]
 class Shell(ShellTemplate):
     """The frame around every page: header (the six-page menu for everyone; Sign in / Join free or the account button),
     the account menu, the footer and the phone tab bar (Guide, Use cases, Playground, Recipes + a More sheet).
+    Search: the header button, the More sheet's Search, Ctrl/Cmd+K or "/" (not while typing) open Dialogs/Search.
     Pages use it with <anvil-form layout="Jev_Buddy.Layouts.Shell">.
 
     Anvil keeps ONE Shell while pages come and go (open_form only swaps the "content" slot when the layout matches),
@@ -26,6 +27,9 @@ class Shell(ShellTemplate):
                                      "before you ship." % datetime.date.today().year)
         self._outside = anvil.js.report_exceptions(self._close_outside)
         self._keys = anvil.js.report_exceptions(self._key)
+        self._searching = False
+        if "Mac" in str(window.navigator.platform or ""):
+            self.dom_nodes["search_kbd"].textContent = "\u2318 K"
         self.refresh("")
 
     def refresh(self, page):
@@ -77,9 +81,42 @@ class Shell(ShellTemplate):
             state.set_attr(self.more_link, "aria-expanded", "false")
 
     def _key(self, event):
-        if getattr(event, "key", None) == "Escape":
+        key = getattr(event, "key", None)
+        if key == "Escape":
             self.menu.visible = False
             self.sheet.visible = False
+            return
+        mod = getattr(event, "ctrlKey", False) or getattr(event, "metaKey", False)
+        if mod and key in ("k", "K") and not getattr(event, "altKey", False):
+            event.preventDefault()
+            self.open_search()
+        elif key == "/" and not mod and not getattr(event, "altKey", False) and not self._typing(event):
+            event.preventDefault()
+            self.open_search()
+
+    def _typing(self, event):
+        t = event.target
+        tag = str(getattr(t, "tagName", "") or "").upper()
+        return tag in ("INPUT", "TEXTAREA", "SELECT") or bool(getattr(t, "isContentEditable", False))
+
+    def search_click(self, event):
+        self.menu.visible = False
+        self.sheet.visible = False
+        state.set_attr(self.more_link, "aria-expanded", "false")
+        self.open_search()
+
+    def open_search(self):
+        """The search palette; opening a hit goes to its address (#learn/<chapter>/<section>, #examples/<slug>...)."""
+        if self._searching:
+            return
+        self._searching = True
+        try:
+            from ...Dialogs.Search import Search
+            go = alert(Search(), buttons=[], role="app-dialog", large=True, dismissible=True)
+        finally:
+            self._searching = False
+        if go:
+            router.go(*str(go).split("/"))
 
     @handle("", "show")
     def form_show(self, **event_args):

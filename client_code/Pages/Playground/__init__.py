@@ -10,11 +10,13 @@ TABS = ["answers", "request", "code"]
 
 
 class Playground(PlaygroundTemplate):
-    """#playground, #playground/recipe/<id>: build a Jev request (state + typed questions) and run it.
+    """#playground, #playground/recipe/<id>, #playground/s/<code> (a share link): build a Jev request (state + typed questions) and run it.
     Answers come live through the server (run_live: OpenRouter or the admin's own open-source server) when an admin
     switched live runs on and the visitor is signed in; otherwise from the in-browser simulator (JB.simulate), clearly
     labelled. The draft is kept in this browser (store 'pg_draft', the same key as before; examples and recipes hand
-    requests over through it). Members save the draft as a recipe (Dialogs/SaveRecipe -> save_recipe)."""
+    requests over through it). Members save the draft as a recipe (Dialogs/SaveRecipe -> save_recipe).
+    Share (anyone, no account): the request packed into the link itself (jb.pack -> #playground/s/<code>, Dialogs/
+    ShareDraft, with a README badge). Opening one keeps the visitor's old draft in store 'pg_prev' for "Restore"."""
 
     def __init__(self, args=(), **properties):
         super().__init__(**properties)
@@ -39,6 +41,9 @@ class Playground(PlaygroundTemplate):
         self.questions.add_event_handler("x-redraw", self._redraw)
         self.questions.add_event_handler("x-del-q", self._del_q)
         self._key = anvil.js.report_exceptions(self._keydown)
+        self.share_bar.visible = False
+        if len(args) >= 2 and args[0] == "s":
+            self._open_shared(args[1])
         if len(args) >= 2 and args[0] == "recipe":
             res = anvil.server.call("get_recipe", args[1])
             if isinstance(res, dict) and res.get("ok"):
@@ -53,6 +58,73 @@ class Playground(PlaygroundTemplate):
         if isinstance(s, dict):
             self.status = s
         self._draw_all()
+
+    # ---- share links
+    def _open_shared(self, code):
+        """#playground/s/<code>: load the request inside the link (old draft kept for Restore), or say it's broken."""
+        router.replace("playground")
+        data = jb.unpack(code)
+        qs = data.get("q") if isinstance(data, dict) else None
+        d = None
+        if isinstance(qs, dict) and qs and all(isinstance(q, dict) and q.get("type") in ("choice", "noul", "score")
+                                               for q in qs.values()):
+            try:
+                d = jb.from_map(data.get("s"), qs)
+            except Exception:
+                d = None
+        self.share_bar.visible = True
+        if d is None:
+            self.share_msg.role = ["msg-error", "pg-shared-msg"]
+            self.share_msg.text = ("That share link is broken or cut short, so your own draft is still here. "
+                                   "Ask for the link again and copy the whole address.")
+            self.restore_button.visible = False
+            return
+        prev = jb.store_get("pg_draft")
+        had_prev = bool(prev and prev.get("questions"))
+        if had_prev:
+            jb.store_set("pg_prev", prev)
+        self.d = d
+        self.meta = {"title": str(data.get("t") or "Shared request")[:80], "from": "share"}
+        self._persist()
+        n = len(jb.problems(d))
+        self.share_msg.role = ["msg-note", "pg-shared-msg"]
+        self.share_msg.text = ("You opened a shared request. Press Run to try it, or change it: it's your copy now."
+                               + (" It has %d thing%s to fix first (listed on the right)." % (n, "" if n == 1 else "s") if n else ""))
+        self.restore_button.visible = had_prev
+
+    @handle("restore_button", "click")
+    def restore_button_click(self, **event_args):
+        prev = jb.store_get("pg_prev")
+        if not (prev and prev.get("questions")):
+            state.toast("Your previous draft isn't in this browser any more.", "error")
+            return
+        jb.store_set("pg_prev", None)
+        self._load({"state": prev.get("state"), "questions": prev["questions"]}, prev.get("meta") or {})
+        self.share_bar.visible = False
+        state.toast("Your previous draft is back.", "ok")
+
+    @handle("share_close", "click")
+    def share_close_click(self, **event_args):
+        self.share_bar.visible = False
+
+    @handle("share_button", "click")
+    def share_button_click(self, **event_args):
+        req = jb.to_req(self.d)
+        if not req["questions"]:
+            state.toast("Add a question first: there's nothing to share yet.", "error")
+            return
+        m = jb.loose(self.meta) or {}
+        code = jb.pack({"v": 1, "t": str(m.get("title") or "Shared request")[:80], "s": req["state"], "q": req["questions"]})
+        if not code:
+            state.toast("This browser couldn't make a link. Try Save instead.", "error")
+            return
+        from ...Dialogs.ShareDraft import ShareDraft
+        base = str(window.location.href).split("#")[0]
+        res = alert(ShareDraft(link=base + "#playground/s/" + code, origin=str(window.location.origin),
+                               problems=len(jb.problems(self.d))),
+                    buttons=[], role="app-dialog", dismissible=True)
+        if res == "save":
+            self.save_button_click()
 
     # ---- the draft
     def _persist(self):

@@ -13,6 +13,7 @@ layout_metadata:
         <anvil-component type="RepeatingPanel" name="nav_panel" prop:item_template="Jev_Buddy.Items.NavLink" prop:role='["contents"]'></anvil-component>
       </nav>
       <div class="ui-header-right">
+        <button type="button" class="jb-search-btn" anvil:on-dom:click="self.search_click" aria-label="Search (Ctrl+K or /)" title="Search (Ctrl+K or /)" aria-haspopup="dialog"><i class="ic ic-search"></i><span class="jb-search-t">Search</span><kbd anvil:dom-node="search_kbd">Ctrl K</kbd></button>
         <div class="ui-row" anvil:name="guest_actions">
           <a class="ui-btn ghost" href="#auth">Sign in</a>
           <a class="ui-btn primary" href="#auth/signup">Join free</a>
@@ -76,6 +77,7 @@ layout_metadata:
     <anvil-component type="RepeatingPanel" name="tab_panel" prop:item_template="Jev_Buddy.Items.NavLink" prop:role='["contents"]'></anvil-component>
     <a href="#landing" class="more" anvil:name="more_link" anvil:on-dom:click="self.more_click" aria-haspopup="true" aria-expanded="false"><i class="ic ic-menu"></i><span>More</span></a>
     <div class="jb-sheet" anvil:name="sheet">
+      <button type="button" anvil:on-dom:click="self.search_click"><i class="ic ic-search"></i>Search</button>
       <a href="#opensource"><i class="ic ic-unlock"></i>Open source</a>
       <a href="#tools"><i class="ic ic-calc"></i>Tools</a>
       <a href="#landing"><i class="ic ic-info"></i>About Jev Buddy</a>

@@ -132,6 +132,13 @@ tools/                     check.py, assets.py, build_icons.py, make_icons.py, u
 
 ## Gotchas
 
+- **Never set `self.html` on a Form** (or a property called `html`): templated Forms use it, and assigning it replaces
+  the whole template (ShareDraft's badge HTML did that, 2026-11-20). Use another name.
+- Search content: new chapters, gotchas (`JB.GOTCHAS`), use cases and Open source sections are indexed automatically;
+  error codes are `JB.ERRORS` in jb-content.js (only fixes the guide itself states). Tools/pages: `PAGES` there.
+- Check my data must never send or store the rows (privacy promise on the page): keep calib.py client-only, keep
+  store 'thr' to slider values, keep `data-no-keep` on the CSV box.
+
 - The local App Server (1.18) lags hosted Anvil: no `HtmlComponent.attrs` (use state.set_attr), `Notification(role=)`
   raises (state.toast falls back), notifications are `.anvil-alert[data-notify]`, components are wrapped in
   `<anvil-dropzone>` (app.css: `display: contents`). app.css styles both. Test on hosted Anvil too for big changes.

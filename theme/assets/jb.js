@@ -564,3 +564,56 @@
   ];
   JB.example = function (slug) { return JB.EXAMPLES.filter(function (e) { return e.slug === slug; })[0]; };
 })();
+
+/* JB.reliability: the reliability chart for Tools -> Threshold simulator (sample or "My data").
+   bins = [{lo, hi, n, acc, conf}] from client_code/calib.py; summary = the aria-label (what the chart says).
+   Bars = how often answers in each confidence bin were right; the red cap = the gap when the bin claimed more than it
+   delivered (over-confident); the dashed diagonal = perfect calibration. */
+(function () {
+  var esc = UI.esc;
+  JB.reliability = function (bins, summary) {
+    var W = 600, H = 260, L = 40, R = 12, T = 12, B = 34, w = W - L - R, h = H - T - B;
+    var x = function (v) { return L + v * w; }, y = function (v) { return T + (1 - v) * h; };
+    var out = [];
+    [0, 0.25, 0.5, 0.75, 1].forEach(function (g) {
+      out.push('<line x1="' + L + '" x2="' + (W - R) + '" y1="' + y(g).toFixed(1) + '" y2="' + y(g).toFixed(1) + '" stroke="var(--c-line)" stroke-width="1"/>');
+      out.push('<text x="' + (L - 6) + '" y="' + (y(g) + 4).toFixed(1) + '" font-size="11" text-anchor="end" fill="var(--c-faint)" font-family="JetBrains Mono, monospace">' + Math.round(g * 100) + '%</text>');
+      out.push('<text x="' + x(g).toFixed(1) + '" y="' + (H - 14) + '" font-size="11" text-anchor="middle" fill="var(--c-faint)" font-family="JetBrains Mono, monospace">' + g + '</text>');
+    });
+    var maxN = Math.max.apply(null, bins.map(function (b) { return b.n; }).concat([1]));
+    bins.forEach(function (b) {
+      if (!b.n) return;
+      var x0 = x(b.lo) + 3, bw = (b.hi - b.lo) * w - 6, top = y(b.acc), op = (0.45 + 0.5 * Math.sqrt(b.n / maxN)).toFixed(2);
+      out.push('<rect x="' + x0.toFixed(1) + '" y="' + top.toFixed(1) + '" width="' + bw.toFixed(1) + '" height="' + (y(0) - top).toFixed(1) + '" rx="2" fill="var(--c-brand)" opacity="' + op + '"><title>' +
+        esc(b.lo.toFixed(1) + ' to ' + b.hi.toFixed(1) + ': ' + b.n + ' answers, right ' + Math.round(b.acc * 100) + '%, average confidence ' + b.conf.toFixed(2)) + '</title></rect>');
+      if (b.conf > b.acc + 0.005) {
+        out.push('<rect x="' + x0.toFixed(1) + '" y="' + y(b.conf).toFixed(1) + '" width="' + bw.toFixed(1) + '" height="' + (top - y(b.conf)).toFixed(1) + '" fill="var(--c-bad)" opacity=".3" stroke="var(--c-bad)" stroke-width="1"/>');
+      }
+      out.push('<line x1="' + x0.toFixed(1) + '" x2="' + (x0 + bw).toFixed(1) + '" y1="' + y(b.conf).toFixed(1) + '" y2="' + y(b.conf).toFixed(1) + '" stroke="var(--c-ink)" stroke-width="2"/>');
+    });
+    out.push('<line x1="' + x(0) + '" y1="' + y(0) + '" x2="' + x(1) + '" y2="' + y(1) + '" stroke="var(--c-muted)" stroke-width="1.5" stroke-dasharray="5 4"/>');
+    out.push('<text x="' + (L + w / 2) + '" y="' + (H - 1) + '" font-size="11" text-anchor="middle" fill="var(--c-muted)" font-family="JetBrains Mono, monospace">confidence</text>');
+    return '<div class="tl-chart tl-rel"><svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="' + esc(summary || 'Reliability chart') + '">' + out.join('') + '</svg></div>';
+  };
+
+  /* Share links: a playground request packed into the address (#playground/s/<code>), no account and no server.
+     JSON -> UTF-8 -> base64url. JB.unpack gives null for anything broken. */
+  function b64url(bytes) {
+    var bin = '';
+    for (var i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+    return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  }
+  JB.pack = function (json) {
+    try { return b64url(new TextEncoder().encode(typeof json === 'string' ? json : JSON.stringify(json))); } catch (e) { return null; }
+  };
+  JB.unpack = function (code) {
+    try {
+      if (!code || !/^[A-Za-z0-9_-]+$/.test(code)) return null;
+      var s = code.replace(/-/g, '+').replace(/_/g, '/');
+      while (s.length % 4) s += '=';
+      var bin = atob(s), bytes = new Uint8Array(bin.length);
+      for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+      return JSON.stringify(JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(bytes)));
+    } catch (e) { return null; }
+  };
+})();

@@ -7,7 +7,13 @@
             <anvil-component type="Label" name="title_badge" prop:role='["badge"]'></anvil-component></h1>
         </div>
         <anvil-component type="DropDown" name="template_box" prop:role='["pg-template"]'></anvil-component>
+        <anvil-component type="Button" name="share_button" prop:text="Share" prop:role='["btn", "ic-link"]' prop:tooltip="A link or README badge that opens this request"></anvil-component>
         <anvil-component type="Button" name="save_button" prop:text="Save" prop:role='["btn", "ic-save"]'></anvil-component>
+      </div>
+      <div class="pg-shared" anvil:name="share_bar">
+        <anvil-component type="Label" name="share_msg" prop:role='["msg-note", "pg-shared-msg"]'></anvil-component>
+        <anvil-component type="Button" name="restore_button" prop:text="Restore my previous draft" prop:role='["btn", "btn-sm", "ic-refresh"]'></anvil-component>
+        <anvil-component type="Button" name="share_close" prop:text="Dismiss" prop:role='["btn", "btn-sm", "btn-ghost", "btn-icon", "ic-x"]'></anvil-component>
       </div>
       <div class="pg-grid">
         <div class="pg-col">

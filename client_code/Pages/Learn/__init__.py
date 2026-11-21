@@ -34,6 +34,7 @@ class Learn(LearnTemplate):
     """#learn: the guide's index (16 chapters in 4 groups, read ticks, progress, Continue reading).
     #learn/<chapter>: one chapter: the chapter list with ticks beside it (a picker on phones), the chapter text from
     the engine (JB.chapter in jb-content.js: code tabs remember the reader's language), previous / next.
+    #learn/<chapter>/<section>: the same, scrolled to the section's <h2 id> (search hits link there).
     A chapter counts as read when its end scrolls into view or after 45 seconds."""
 
     def __init__(self, args=(), **properties):
@@ -41,6 +42,7 @@ class Learn(LearnTemplate):
         self.chs = jb.chapters()
         ids = [c["id"] for c in self.chs]
         self.cid = args[0] if args and args[0] in ids else None
+        self.section = args[1] if self.cid and len(args) > 1 else None
         self._timer = None
         self._io = None
         self.index_part.visible = self.cid is None
@@ -109,6 +111,9 @@ class Learn(LearnTemplate):
         if not self.cid:
             return
         cid = self.cid
+        if self.section:
+            sec = self.section
+            window.setTimeout(lambda: self._scroll_to(sec), 40)
 
         def seen(entries, *rest):
             if entries[0].isIntersecting:
@@ -119,6 +124,11 @@ class Learn(LearnTemplate):
             self._io = anvil.js.new(window.IntersectionObserver, anvil.js.report_exceptions(seen))
             self._io.observe(self.dom_nodes["end"])
         self._timer = window.setTimeout(lambda: mark_read(cid), 45000)
+
+    def _scroll_to(self, section):
+        el = anvil.js.get_dom_node(self.body).querySelector('[id="%s"]' % window.CSS.escape(str(section)))
+        if el:
+            el.scrollIntoView(jb.to_js({"block": "start"}))
 
     def _stop_io(self):
         if self._io is not None:
